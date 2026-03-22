@@ -10,15 +10,17 @@ namespace WebAPI.Controllers
     {
         private readonly EventService _eventService;
         private readonly ILogger<EventController> _logger;
+        private readonly IWebHostEnvironment _env;
 
-        public EventController(EventService eventService, ILogger<EventController> logger)
+        public EventController(EventService eventService, ILogger<EventController> logger, IWebHostEnvironment env)
         {
+            _env = env;
             _eventService = eventService;
             _logger = logger;
         }
 
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<VolunteerEventDTO>>> GetEvents(
+        [HttpGet("[action]")]
+        public async Task<ActionResult<IEnumerable<VolunteerEventDTO>>> GetAllEvents(
             [FromQuery] int? catId,
             [FromQuery] int? cityId,
             [FromQuery] string? keyWords,
@@ -34,7 +36,7 @@ namespace WebAPI.Controllers
             return Ok(await _eventService.GetFilteredAsync(catId, cityId, keyWords, dateTime));
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("[action]/{id}")]
         public async Task<ActionResult<VolunteerEventDTO>> GetEventById(int id)
         {
             var currUser = User.Identity?.IsAuthenticated == true ? User.Identity.Name : "Неавторизованный пользователь";
@@ -49,22 +51,27 @@ namespace WebAPI.Controllers
             return Ok(ev);
         }
 
-        [HttpPost]
-        public async Task<ActionResult<VolunteerEventDTO>> CreateEvent(CreateVolunteerEventDTO dto)
+        [HttpPost("[action]")]
+        public async Task<ActionResult<VolunteerEventDTO>> CreateEvent(
+            [FromForm] CreateVolunteerEventDTO dto)
         {
             var currUser = User.Identity?.IsAuthenticated == true ? User.Identity.Name : "Неавторизованный пользователь";
-
             _logger.LogInformation($"{currUser} создает событие");
 
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var created = await _eventService.AddAsync(dto);
+            //ID текущего пользователя
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized("Пользователь не авторизован");
 
-            return CreatedAtAction(nameof(GetEventById), new { id = created.Id }, dto);
+            var created = await _eventService.AddAsync(dto,userId, _env);
+
+            return Ok(created);
         }
 
-        [HttpPut("{id}")]
+        [HttpPut("[action]/{id}")]
         public async Task<ActionResult> UpdateEvent(int id, VolunteerEventDTO dto)
         {
             var currUser = User.Identity?.IsAuthenticated == true ? User.Identity.Name : "Неавторизованный пользователь";
@@ -82,7 +89,7 @@ namespace WebAPI.Controllers
             return Ok(updated);
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("[action]/{id}")]
         public async Task<IActionResult> DeleteEvent(int id)
         {
             var currUser = User.Identity?.IsAuthenticated == true ? User.Identity.Name : "Неавторизованный пользователь";
@@ -101,7 +108,7 @@ namespace WebAPI.Controllers
             }
         }
 
-        [HttpDelete("soft/{id}")]
+        [HttpDelete("[action]/{id}")]
         public async Task<IActionResult> SoftDeleteEvent(int id)
         {
             var currUser = User.Identity?.IsAuthenticated == true ? User.Identity.Name : "Неавторизованный пользователь";

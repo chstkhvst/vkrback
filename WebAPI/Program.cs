@@ -52,8 +52,9 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 builder.Services.AddAuthorization(options =>
 {
-    options.AddPolicy("RequireAdminRole", policy => policy.RequireRole("admin"));
-    options.AddPolicy("RequireRoleUser", policy => policy.RequireRole("User"));
+    options.AddPolicy("RequireModerRole", policy => policy.RequireRole("moderator"));
+    options.AddPolicy("RequireVolunteerRole", policy => policy.RequireRole("volunteer"));
+    options.AddPolicy("RequireOrganizerRole", policy => policy.RequireRole("organizer"));
 });
 builder.Services.Configure<FormOptions>(options =>
 {

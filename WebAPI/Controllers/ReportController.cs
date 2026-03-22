@@ -17,7 +17,7 @@ namespace WebAPI.Controllers
             _logger = logger;
         }
 
-        [HttpGet]
+        [HttpGet("[action]")]
         public async Task<ActionResult<IEnumerable<UserReportDTO>>> GetReports()
         {
             var currUser = User.Identity?.IsAuthenticated == true
@@ -30,7 +30,7 @@ namespace WebAPI.Controllers
             return Ok(reports);
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("[action]/{id}")]
         public async Task<ActionResult<UserReportDTO>> GetReportById(int id)
         {
             var currUser = User.Identity?.IsAuthenticated == true
@@ -47,7 +47,7 @@ namespace WebAPI.Controllers
             return Ok(report);
         }
 
-        [HttpGet("sender/{senderId}")]
+        [HttpGet("[action]/{senderId}")]
         public async Task<ActionResult<IEnumerable<UserReportDTO>>> GetBySender(string senderId)
         {
             var currUser = User.Identity?.IsAuthenticated == true
@@ -60,7 +60,7 @@ namespace WebAPI.Controllers
             return Ok(reports);
         }
 
-        [HttpGet("reported/{reportedId}")]
+        [HttpGet("[action]/{reportedId}")]
         public async Task<ActionResult<IEnumerable<UserReportDTO>>> GetByReported(string reportedId)
         {
             var currUser = User.Identity?.IsAuthenticated == true
@@ -73,7 +73,7 @@ namespace WebAPI.Controllers
             return Ok(reports);
         }
 
-        [HttpGet("status/{statusId}")]
+        [HttpGet("[action]/{statusId}")]
         public async Task<ActionResult<IEnumerable<UserReportDTO>>> GetByStatus(int statusId)
         {
             var currUser = User.Identity?.IsAuthenticated == true
@@ -86,7 +86,7 @@ namespace WebAPI.Controllers
             return Ok(reports);
         }
 
-        [HttpPost]
+        [HttpPost("[action]")]
         public async Task<ActionResult<UserReportDTO>> CreateReport(CreateReportDTO dto)
         {
             var currUser = User.Identity?.IsAuthenticated == true
@@ -100,10 +100,10 @@ namespace WebAPI.Controllers
 
             var created = await _reportService.AddAsync(dto);
 
-            return CreatedAtAction(nameof(GetReportById), new { id = created.Id }, created);
+            return Ok(created);
         }
 
-        [HttpPut("{id}")]
+        [HttpPut("[action]/{id}")]
         public async Task<ActionResult<UserReportDTO>> UpdateReport(int id, UserReportDTO dto)
         {
             var currUser = User.Identity?.IsAuthenticated == true
@@ -123,7 +123,7 @@ namespace WebAPI.Controllers
             return Ok(updated);
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("[action]/{id}")]
         public async Task<IActionResult> DeleteReport(int id)
         {
             var currUser = User.Identity?.IsAuthenticated == true
@@ -144,7 +144,7 @@ namespace WebAPI.Controllers
             }
         }
 
-        [HttpDelete("soft/{id}")]
+        [HttpDelete("[action]/{id}")]
         public async Task<IActionResult> SoftDeleteReport(int id)
         {
             var currUser = User.Identity?.IsAuthenticated == true

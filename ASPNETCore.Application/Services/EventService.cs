@@ -2,6 +2,8 @@
 using ASPNETCore.Domain.Entities;
 using ASPNETCore.Domain.Interfaces;
 using ASPNETCore.Infrastructure.Repositories;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 
 namespace ASPNETCore.Application.Services
@@ -66,7 +68,7 @@ namespace ASPNETCore.Application.Services
             };
         }
 
-        public async Task<VolunteerEventDTO> AddAsync(CreateVolunteerEventDTO dto)
+        public async Task<VolunteerEventDTO> AddAsync(CreateVolunteerEventDTO dto, string userId, IWebHostEnvironment env)
         {
             var entity = new VolunteerEvent
             {
@@ -78,15 +80,32 @@ namespace ASPNETCore.Application.Services
                 EventDateTime = dto.EventDateTime,
                 EventPoints = dto.EventPoints,
                 ParticipantsLimit = dto.ParticipantsLimit,
-                ImagePath = dto.ImagePath,
                 EventCategoryId = dto.EventCategoryId,
-                EventStatusId = dto.EventStatusId,
+                EventStatusId = 1, // на модерации
                 CityId = dto.CityId,
-                UserId = dto.UserId,
-
-                ModeratedByUserId = dto.ModeratedByUserId,
-                IsDeleted = dto.IsDeleted
+                UserId = userId,
+                ModeratedByUserId = null,
+                IsDeleted = false
             };
+
+            // изображение
+            if (dto.Image != null && dto.Image.Length > 0)
+            {
+                var uploadsFolder = env.WebRootPath;
+
+                if (!Directory.Exists(uploadsFolder))
+                    Directory.CreateDirectory(uploadsFolder);
+
+                var uniqueFileName = $"{Guid.NewGuid()}{Path.GetExtension(dto.Image.FileName)}";
+                var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await dto.Image.CopyToAsync(stream);
+                }
+
+                entity.ImagePath = $"/{uniqueFileName}";
+            }
 
             var created = await _eventRepository.AddAsync(entity);
 

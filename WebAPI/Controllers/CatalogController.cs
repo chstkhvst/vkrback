@@ -17,7 +17,7 @@ namespace WebAPI.Controllers
             _logger = lo;
         }
 
-        [HttpGet("attendancestatus")]
+        [HttpGet("[action]")]
         public async Task<ActionResult<IEnumerable<AttendanceStatus>>> GetAttendanceStatuses()
         {
             var currUser = User.Identity.IsAuthenticated ? User.Identity.Name : "Неавторизованный пользователь";
@@ -26,7 +26,7 @@ namespace WebAPI.Controllers
             return Ok(dealTypes);
         }
 
-        [HttpGet("attendancestatus/{id}")]
+        [HttpGet("[action]/{id}")]
         public async Task<ActionResult<AttendanceStatus>> GetAttendanceStatus(int id)
         {
             var currUser = User.Identity.IsAuthenticated ? User.Identity.Name : "Неавторизованный пользователь";
@@ -36,7 +36,7 @@ namespace WebAPI.Controllers
             return Ok(dealType);
         }
 
-        [HttpGet("city")]
+        [HttpGet("[action]")]
         public async Task<ActionResult<IEnumerable<City>>> GetCities()
         {
             var currUser = User.Identity.IsAuthenticated ? User.Identity.Name : "Неавторизованный пользователь";
@@ -45,7 +45,7 @@ namespace WebAPI.Controllers
             return Ok(objectTypes);
         }
 
-        [HttpGet("city/{id}")]
+        [HttpGet("[action]/{id}")]
         public async Task<ActionResult<City>> GetCity(int id)
         {
             var currUser = User.Identity.IsAuthenticated ? User.Identity.Name : "Неавторизованный пользователь";
@@ -55,7 +55,7 @@ namespace WebAPI.Controllers
             return Ok(objectType);
         }
 
-        [HttpGet("eventcategory")]
+        [HttpGet("[action]")]
         public async Task<ActionResult<IEnumerable<EventCategory>>> GetEventCategories()
         {
             var currUser = User.Identity.IsAuthenticated ? User.Identity.Name : "Неавторизованный пользователь";
@@ -64,7 +64,7 @@ namespace WebAPI.Controllers
             return Ok(statuses);
         }
 
-        [HttpGet("eventcategory/{id}")]
+        [HttpGet("[action]/{id}")]
         public async Task<ActionResult<EventCategory>> GetEventCategory(int id)
         {
             var currUser = User.Identity.IsAuthenticated ? User.Identity.Name : "Неавторизованный пользователь";
@@ -74,7 +74,7 @@ namespace WebAPI.Controllers
             return Ok(status);
         }
 
-        [HttpGet("eventstatus")]
+        [HttpGet("[action]")]
         public async Task<ActionResult<IEnumerable<EventStatus>>> GetEventStatuses()
         {
             var currUser = User.Identity.IsAuthenticated ? User.Identity.Name : "Неавторизованный пользователь";
@@ -83,7 +83,7 @@ namespace WebAPI.Controllers
             return Ok(resStatuses);
         }
 
-        [HttpGet("eventstatus/{id}")]
+        [HttpGet("[action]/{id}")]
         public async Task<ActionResult<EventStatus>> GetEventStatus(int id)
         {
             var currUser = User.Identity.IsAuthenticated ? User.Identity.Name : "Неавторизованный пользователь";
@@ -92,7 +92,7 @@ namespace WebAPI.Controllers
             if (resStatus == null) return NotFound();
             return Ok(resStatus);
         }
-        [HttpGet("reportstatus")]
+        [HttpGet("[action]")]
         public async Task<ActionResult<IEnumerable<ReportStatus>>> GetReportStatuses()
         {
             var currUser = User.Identity.IsAuthenticated ? User.Identity.Name : "Неавторизованный пользователь";
@@ -101,7 +101,7 @@ namespace WebAPI.Controllers
             return Ok(resStatuses);
         }
 
-        [HttpGet("reportstatus/{id}")]
+        [HttpGet("[action]/{id}")]
         public async Task<ActionResult<EventStatus>> GetReportStatus(int id)
         {
             var currUser = User.Identity.IsAuthenticated ? User.Identity.Name : "Неавторизованный пользователь";
@@ -110,7 +110,7 @@ namespace WebAPI.Controllers
             if (resStatus == null) return NotFound();
             return Ok(resStatus);
         }
-        [HttpGet("ranks")]
+        [HttpGet("[action]")]
         public async Task<ActionResult<IEnumerable<ReportStatus>>> GetVolunteerRanks()
         {
             var currUser = User.Identity.IsAuthenticated ? User.Identity.Name : "Неавторизованный пользователь";
@@ -119,7 +119,7 @@ namespace WebAPI.Controllers
             return Ok(resStatuses);
         }
 
-        [HttpGet("ranks/{id}")]
+        [HttpGet("[action]/{id}")]
         public async Task<ActionResult<EventStatus>> GetVolunteerRank(int id)
         {
             var currUser = User.Identity.IsAuthenticated ? User.Identity.Name : "Неавторизованный пользователь";

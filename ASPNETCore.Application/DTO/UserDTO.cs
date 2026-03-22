@@ -21,6 +21,7 @@ namespace ASPNETCore.Application.DTO
         }
         public string Id { get; set; }
         public string? UserName { get; set; }
+        public string? ProfileImagePath { get; set; }
         public VolunteerProfileDTO? VolunteerProfile { get; set; }
         public OrganizerProfileDTO? OrganizerProfile { get; set; }
     }

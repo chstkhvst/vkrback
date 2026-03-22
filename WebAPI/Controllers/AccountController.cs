@@ -1,4 +1,5 @@
-﻿using ASPNETCore.Application.Model;
+﻿using ASPNETCore.Application.DTO;
+using ASPNETCore.Application.Model;
 using ASPNETCore.Application.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -15,7 +16,7 @@ public class AccountController : ControllerBase
     }
 
     [HttpPost("register")]
-    public async Task<IActionResult> Register(RegisterModel model)
+    public async Task<ActionResult<AuthResponse>> Register(RegisterModel model)
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
@@ -25,11 +26,16 @@ public class AccountController : ControllerBase
         if (!result.Succeeded)
             return BadRequest(result.Errors);
 
-        return Ok();
-    }
+        var loginResponse = await _accountService.Login(new LoginModel
+        {
+            UserName = model.UserName,
+            Password = model.Password
+        });
 
+        return Ok(loginResponse);
+    }
     [HttpPost("login")]
-    public async Task<IActionResult> Login(LoginModel model)
+    public async Task<ActionResult<AuthResponse>> Login(LoginModel model)
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
@@ -52,7 +58,7 @@ public class AccountController : ControllerBase
 
     [Authorize]
     [HttpGet("profile")]
-    public async Task<IActionResult> GetCurrentUser()
+    public async Task<ActionResult<UserDTO>> GetCurrentUser()
     {
         var user = await _accountService.GetCurrentUser(User);
 
@@ -61,7 +67,6 @@ public class AccountController : ControllerBase
 
         return Ok(user);
     }
-
     [Authorize]
     [HttpPut("profile")]
     public async Task<IActionResult> UpdateProfile(UpdateProfileModel model)

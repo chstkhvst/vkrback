@@ -6,5 +6,6 @@ namespace ASPNETCore.Application.Model
     {
         public string Token { get; set; }
         public UserDTO User { get; set; }
+        public string Role { get; set; }
     }
 }

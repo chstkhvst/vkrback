@@ -21,8 +21,8 @@ namespace WebAPI.Controllers
                 _logger = logger;
             }
 
-            [HttpGet]
-            public async Task<ActionResult<IEnumerable<EventAttendanceDTO>>> GetAll()
+            [HttpGet("[action]")]
+            public async Task<ActionResult<IEnumerable<EventAttendanceDTO>>> GetAttendanceAll()
             {
                 var currUser = User.Identity?.IsAuthenticated == true
                     ? User.Identity.Name
@@ -33,8 +33,8 @@ namespace WebAPI.Controllers
                 return Ok(await _attendanceService.GetAllAsync());
             }
 
-            [HttpGet("{id}")]
-            public async Task<ActionResult<EventAttendanceDTO>> GetById(int id)
+            [HttpGet("[action]/{id}")]
+            public async Task<ActionResult<EventAttendanceDTO>> GetAttendanceById(int id)
             {
                 var currUser = User.Identity?.IsAuthenticated == true
                     ? User.Identity.Name
@@ -50,7 +50,7 @@ namespace WebAPI.Controllers
                 return Ok(attendance);
             }
 
-            [HttpGet("user/{userId}")]
+            [HttpGet("[action]/{userId}")]
             public async Task<ActionResult<IEnumerable<EventAttendanceDTO>>> GetByUserId(string userId)
             {
                 var currUser = User.Identity?.IsAuthenticated == true
@@ -62,8 +62,8 @@ namespace WebAPI.Controllers
                 return Ok(await _attendanceService.GetByUserIdAsync(userId));
             }
 
-            [HttpGet("event/{eventId}")]
-            public async Task<ActionResult<IEnumerable<EventAttendanceDTO>>> GetByEventId(int eventId)
+            [HttpGet("[action]/{eventId}")]
+            public async Task<ActionResult<IEnumerable<EventAttendanceDTO>>> GetAttendanceByEventId(int eventId)
             {
                 var currUser = User.Identity?.IsAuthenticated == true
                     ? User.Identity.Name
@@ -74,7 +74,7 @@ namespace WebAPI.Controllers
                 return Ok(await _attendanceService.GetByEventIdAsync(eventId));
             }
 
-            [HttpGet("user/{userId}/event/{eventId}")]
+            [HttpGet("[action]/{userId}/{eventId}")]
             public async Task<ActionResult<EventAttendanceDTO>> GetByUserAndEvent(string userId, int eventId)
             {
                 var currUser = User.Identity?.IsAuthenticated == true
@@ -91,7 +91,7 @@ namespace WebAPI.Controllers
                 return Ok(attendance);
             }
 
-            [HttpGet("count/{eventId}")]
+            [HttpGet("[action]/{eventId}")]
             public async Task<ActionResult<int>> CountParticipants(int eventId)
             {
                 var currUser = User.Identity?.IsAuthenticated == true
@@ -103,7 +103,7 @@ namespace WebAPI.Controllers
                 return Ok(await _attendanceService.CountParticipantsAsync(eventId));
             }
 
-            [HttpPost]
+            [HttpPost("[action]")]
             public async Task<ActionResult> Create(CreateEventAttendanceDTO dto)
             {
                 var currUser = User.Identity?.IsAuthenticated == true
@@ -117,10 +117,10 @@ namespace WebAPI.Controllers
 
                 var created = await _attendanceService.AddAsync(dto);
 
-                return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
+                return Ok(created);
             }
 
-            [HttpPut("{id}")]
+            [HttpPut("[action]/{id}")]
             public async Task<ActionResult> Update(int id, EventAttendanceDTO dto)
             {
                 var currUser = User.Identity?.IsAuthenticated == true
@@ -140,7 +140,7 @@ namespace WebAPI.Controllers
                 return Ok(updated);
             }
 
-            [HttpDelete("{id}")]
+            [HttpDelete("[action]/{id}")]
             public async Task<IActionResult> Delete(int id)
             {
                 var currUser = User.Identity?.IsAuthenticated == true
@@ -161,7 +161,7 @@ namespace WebAPI.Controllers
                 }
             }
 
-            [HttpDelete("soft/{id}")]
+            [HttpDelete("[action]/{id}")]
             public async Task<IActionResult> SoftDelete(int id)
             {
                 var currUser = User.Identity?.IsAuthenticated == true

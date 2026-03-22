@@ -31,7 +31,8 @@ namespace ASPNETCore.Application.Services
             var user = new User
             {
                 UserName = model.UserName,
-                FullName = model.FullName
+                FullName = model.FullName,
+                Email = model.Email,
             };
 
             var result = await _userManager.CreateAsync(user, model.Password);
@@ -80,11 +81,13 @@ namespace ASPNETCore.Application.Services
                 .FirstOrDefaultAsync(u => u.UserName == model.UserName);
 
             var token = await GenerateJwtToken(user);
+            var roles = await _userManager.GetRolesAsync(user);
 
             return new AuthResponse
             {
                 Token = token,
-                User = new UserDTO(user)
+                User = new UserDTO(user),
+                Role = roles.FirstOrDefault()
             };
         }
 

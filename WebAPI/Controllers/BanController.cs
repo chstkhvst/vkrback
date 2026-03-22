@@ -17,7 +17,7 @@ namespace WebAPI.Controllers
             _logger = logger;
         }
 
-        [HttpGet]
+        [HttpGet("[action]")]
         public async Task<ActionResult<IEnumerable<BanDTO>>> GetBans()
         {
             var currUser = User.Identity?.IsAuthenticated == true
@@ -29,8 +29,8 @@ namespace WebAPI.Controllers
             var bans = await _banService.GetAllAsync();
             return Ok(bans);
         }
-        [HttpGet("{id}")]
-        public async Task<ActionResult<BanDTO>> GetById(int id)
+        [HttpGet("[action]/{id}")]
+        public async Task<ActionResult<BanDTO>> GetBanById(int id)
         {
             var ban = await _banService.GetByIdAsync(id);
 
@@ -40,7 +40,7 @@ namespace WebAPI.Controllers
             return Ok(ban);
         }
 
-        [HttpPost]
+        [HttpPost("[action]")]
         public async Task<ActionResult<BanDTO>> CreateBan(CreateBanDTO dto)
         {
             var currUser = User.Identity?.IsAuthenticated == true
@@ -54,10 +54,10 @@ namespace WebAPI.Controllers
 
             var created = await _banService.AddAsync(dto);
 
-            return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
+            return Ok(created);
         }
 
-        [HttpPut("{id}")]
+        [HttpPut("[action]/{id}")]
         public async Task<ActionResult> UpdateBan(int id, BanDTO dto)
         {
             var currUser = User.Identity?.IsAuthenticated == true
@@ -77,7 +77,7 @@ namespace WebAPI.Controllers
             return Ok(updated);
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("[action]/{id}")]
         public async Task<IActionResult> DeleteBan(int id)
         {
             var currUser = User.Identity?.IsAuthenticated == true
@@ -98,7 +98,7 @@ namespace WebAPI.Controllers
             }
         }
 
-        [HttpDelete("soft/{id}")]
+        [HttpDelete("[action]/{id}")]
         public async Task<IActionResult> SoftDeleteBan(int id)
         {
             var currUser = User.Identity?.IsAuthenticated == true
