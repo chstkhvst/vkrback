@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace ASPNETCore.Application.DTO
@@ -61,9 +62,9 @@ namespace ASPNETCore.Application.DTO
             User = entity.User != null ? new UserDTO(entity.User) : null;
             ModeratedByUser = entity.ModeratedByUser != null ? new UserDTO(entity.ModeratedByUser) : null;
 
-            Attendees = entity.Attendees != null && entity.Attendees.Any()
-                ? entity.Attendees.Select(a => new EventAttendanceDTO(a)).ToList()
-                : new List<EventAttendanceDTO>();
+            //Attendees = entity.Attendees != null && entity.Attendees.Any()
+            //    ? entity.Attendees.Select(a => new EventAttendanceDTO(a)).ToList()
+            //    : new List<EventAttendanceDTO>();
         }
         public int Id { get; set; }
         public string Name { get; set; }

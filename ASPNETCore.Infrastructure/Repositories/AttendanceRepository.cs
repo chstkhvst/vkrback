@@ -76,7 +76,8 @@ namespace ASPNETCore.Infrastructure.Repositories
         public async Task<int> CountParticipantsAsync(int eventId)
         {
             return await _context.EventAttendances
-                .CountAsync(a => a.EventId == eventId && !a.IsDeleted);
+                .Include(a => a.AttendanceStatus)
+                .CountAsync(a => a.EventId == eventId && !a.IsDeleted && a.AttendanceStatusId ==1);
         }
 
         public async Task<EventAttendance> AddAsync(EventAttendance att)

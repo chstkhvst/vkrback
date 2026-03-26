@@ -66,6 +66,21 @@ namespace ASPNETCore.Infrastructure.Repositories
                 .AsNoTracking()
                 .FirstOrDefaultAsync(e => e.Id == id && !e.IsDeleted);
         }
+
+        public async Task<IEnumerable<VolunteerEvent>> GetEventsByUserIdAsync(string userId)
+        {
+            return await _context.VolunteerEvents
+                .Include(e => e.EventCategory)
+                .Include(e => e.EventStatus)
+                .Include(e => e.City)
+                .Include(e => e.Attendees)
+                    .ThenInclude(a => a.User)
+                .Where(e => !e.IsDeleted && e.UserId == userId)
+                .OrderByDescending(e => e.EventDateTime)
+                .AsSplitQuery()
+                .AsNoTracking()
+                .ToListAsync();
+        }
         public async Task<IEnumerable<VolunteerEvent>> GetAllAsync()
         {
             return await _context.VolunteerEvents
@@ -134,6 +149,59 @@ namespace ASPNETCore.Infrastructure.Repositories
                 .Where(e => !e.IsDeleted)
                 .AsNoTracking();
             query = ApplyFilters(query, catId, cityId, keyWords, dateTime);
+
+            var totalCount = await query.CountAsync();
+
+            var items = await query
+                .OrderByDescending(e => e.EventDateTime)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
+
+            return new PaginatedResponse<VolunteerEvent>
+            {
+                Items = items,
+                TotalCount = totalCount,
+                PageSize = pageSize,
+                CurrentPage = pageNumber,
+                TotalPages = totalPages
+            };
+        }
+        public async Task<PaginatedResponse<VolunteerEvent>> GetPagedForUserAsync(
+            string userId,
+            int pageNumber,
+            int pageSize,
+            int? catId,
+            int? cityId,
+            string? keyWords,
+            DateTime? dateTime)
+        {
+            var query = _context.VolunteerEvents
+                .Include(e => e.EventCategory)
+                .Include(e => e.EventStatus)
+                .Include(e => e.City)
+                .Include(e => e.User)
+                    .ThenInclude(u => u.VolunteerProfile)
+                .Include(e => e.User)
+                    .ThenInclude(u => u.OrganizerProfile)
+                .Include(e => e.Attendees)
+                    .ThenInclude(a => a.AttendanceStatus)
+                .Include(e => e.Attendees)
+                    .ThenInclude(a => a.User)
+                .Where(e => !e.IsDeleted)
+                .AsNoTracking();
+
+            query = ApplyFilters(query, catId, cityId, keyWords, dateTime);
+
+            query = query.Where(e =>
+                !e.Attendees.Any(a =>
+                    a.UserId == userId &&
+                    !a.IsDeleted &&
+                    a.AttendanceStatusId == 1
+                )
+            );
 
             var totalCount = await query.CountAsync();
 

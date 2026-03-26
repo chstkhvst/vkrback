@@ -1,5 +1,6 @@
 ﻿using ASPNETCore.Application.DTO;
 using ASPNETCore.Application.Services;
+using ASPNETCore.Domain.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace WebAPI.Controllers
@@ -35,6 +36,64 @@ namespace WebAPI.Controllers
 
             return Ok(await _eventService.GetFilteredAsync(catId, cityId, keyWords, dateTime));
         }
+        [HttpGet("[action]")]
+        public async Task<ActionResult<PaginatedResponse<VolunteerEventDTO>>> GetPagedEvents(
+            [FromQuery] int pageNumber = 1,
+            [FromQuery] int pageSize = 10,
+            [FromQuery] int? catId = null,
+            [FromQuery] int? cityId = null,
+            [FromQuery] string? keyWords = null,
+            [FromQuery] DateTime? dateTime = null)
+        {
+            var currUser = User.Identity?.IsAuthenticated == true
+                ? User.Identity.Name
+                : "Неавторизованный пользователь";
+
+            _logger.LogInformation($"{currUser} получает страницу событий");
+
+            var result = await _eventService.GetPagedAsync(
+                pageNumber,
+                pageSize,
+                catId,
+                cityId,
+                keyWords,
+                dateTime
+            );
+
+            return Ok(result);
+        }
+        [HttpGet("[action]")]
+        public async Task<ActionResult<PaginatedResponse<VolunteerEventDTO>>> GetPagedForUser(
+            [FromQuery] int pageNumber = 1,
+            [FromQuery] int pageSize = 10,
+            [FromQuery] int? catId = null,
+            [FromQuery] int? cityId = null,
+            [FromQuery] string? keyWords = null,
+            [FromQuery] DateTime? dateTime = null)
+        {
+            var currUser = User.Identity?.IsAuthenticated == true
+                ? User.Identity.Name
+                : "Неавторизованный пользователь";
+
+            _logger.LogInformation($"{currUser} получает страницу событий (для пользователя)");
+
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized("Пользователь не авторизован");
+
+            var result = await _eventService.GetPagedForUserAsync(
+                userId,
+                pageNumber,
+                pageSize,
+                catId,
+                cityId,
+                keyWords,
+                dateTime
+            );
+
+            return Ok(result);
+        }
 
         [HttpGet("[action]/{id}")]
         public async Task<ActionResult<VolunteerEventDTO>> GetEventById(int id)
@@ -44,6 +103,20 @@ namespace WebAPI.Controllers
             _logger.LogInformation($"{currUser} получает событие {id}");
 
             var ev = await _eventService.GetByIdAsync(id);
+
+            if (ev == null)
+                return NotFound();
+
+            return Ok(ev);
+        } 
+        [HttpGet("[action]/{userId}")]
+        public async Task<ActionResult<IEnumerable<VolunteerEventDTO>>> GetEventsByUserId(string userId)
+        {
+            var currUser = User.Identity?.IsAuthenticated == true ? User.Identity.Name : "Неавторизованный пользователь";
+
+            _logger.LogInformation($"{currUser} получает все созданные ивенты от {userId}");
+
+            var ev = await _eventService.GetEventsByUserIdAsync(userId);
 
             if (ev == null)
                 return NotFound();

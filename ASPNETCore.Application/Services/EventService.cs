@@ -67,7 +67,60 @@ namespace ASPNETCore.Application.Services
                 TotalPages = result.TotalPages
             };
         }
+        private async Task UpdateCompletedEventsAsync()
+        {
+            var now = DateTime.UtcNow;
 
+            var eventsToUpdate = await _eventRepository.GetAllAsync();
+
+            foreach (var e in eventsToUpdate)
+            {
+                if (e.EventDateTime.HasValue &&
+                    e.EventDateTime.Value < now &&
+                    e.EventStatusId != 5)
+                {
+                    e.EventStatusId = 5;
+                    await _eventRepository.UpdateAsync(e);
+                }
+            }
+        }
+        public async Task<PaginatedResponse<VolunteerEventDTO>> GetPagedForUserAsync(
+            string userId,
+            int pageNumber,
+            int pageSize,
+            int? catId,
+            int? cityId,
+            string? keyWords,
+            DateTime? dateTime)
+        {
+            await UpdateCompletedEventsAsync();
+
+            var result = await _eventRepository.GetPagedForUserAsync(
+                userId,
+                pageNumber,
+                pageSize,
+                catId,
+                cityId,
+                keyWords,
+                dateTime
+            );
+
+            return new PaginatedResponse<VolunteerEventDTO>
+            {
+                Items = result.Items.Select(e => new VolunteerEventDTO(e)).ToList(),
+                TotalCount = result.TotalCount,
+                PageSize = result.PageSize,
+                CurrentPage = result.CurrentPage,
+                TotalPages = result.TotalPages
+            };
+        }
+        public async Task<IEnumerable<VolunteerEventDTO>> GetEventsByUserIdAsync(string userId)
+        {
+            var entities = await _eventRepository.GetEventsByUserIdAsync(userId);
+
+            return entities
+                .Select(a => new VolunteerEventDTO(a!));
+        }
         public async Task<VolunteerEventDTO> AddAsync(CreateVolunteerEventDTO dto, string userId, IWebHostEnvironment env)
         {
             var entity = new VolunteerEvent

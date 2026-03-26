@@ -19,7 +19,7 @@ namespace ASPNETCore.Application.DTO
             UserId = entity.UserId;
             AttendanceStatusId = entity.AttendanceStatusId;
             IsDeleted = entity.IsDeleted;
-            //VolunteerEvent = entity.VolunteerEvent != null ? new VolunteerEventDTO(entity.VolunteerEvent) : null;
+            VolunteerEvent = entity.VolunteerEvent != null ? new VolunteerEventDTO(entity.VolunteerEvent) : null;
             if (entity.AttendanceStatus != null)
             {
                 AttendanceStatus = new AttendanceStatusDTO

@@ -8,6 +8,8 @@ namespace ASPNETCore.Domain.Interfaces
         Task<IEnumerable<VolunteerEvent>> GetAllAsync();
         Task<IEnumerable<VolunteerEvent>> GetFilteredAsync(
             int? catId, int? cityId, string? keyWords, DateTime? dateTime);
+        Task<IEnumerable<VolunteerEvent>> GetEventsByUserIdAsync(
+            string userId);
         Task<VolunteerEvent> UpdateAsync(VolunteerEvent volunteerEvent);
         Task<VolunteerEvent> AddAsync(VolunteerEvent volunteerEvent);
         Task DeleteAsync(int id);
@@ -19,5 +21,14 @@ namespace ASPNETCore.Domain.Interfaces
             int? cityId,
             string? keyWords,
             DateTime? dateTime);
+        Task<PaginatedResponse<VolunteerEvent>> GetPagedForUserAsync(
+            string userId,
+            int pageNumber,
+            int pageSize,
+            int? catId,
+            int? cityId,
+            string? keyWords,
+            DateTime? dateTime
+        );
     }
 }
