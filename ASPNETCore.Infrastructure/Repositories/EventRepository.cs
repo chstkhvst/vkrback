@@ -76,7 +76,7 @@ namespace ASPNETCore.Infrastructure.Repositories
                 .Include(e => e.Attendees)
                     .ThenInclude(a => a.User)
                 .Where(e => !e.IsDeleted && e.UserId == userId)
-                .OrderByDescending(e => e.EventDateTime)
+                .OrderBy(e => e.EventDateTime)
                 .AsSplitQuery()
                 .AsNoTracking()
                 .ToListAsync();
@@ -191,6 +191,7 @@ namespace ASPNETCore.Infrastructure.Repositories
                 .Include(e => e.Attendees)
                     .ThenInclude(a => a.User)
                 .Where(e => !e.IsDeleted)
+                .Where(e => e.EventStatusId == 2)
                 .AsNoTracking();
 
             query = ApplyFilters(query, catId, cityId, keyWords, dateTime);
@@ -200,7 +201,9 @@ namespace ASPNETCore.Infrastructure.Repositories
                     a.UserId == userId &&
                     !a.IsDeleted &&
                     a.AttendanceStatusId == 1
-                )
+                ) && //лимит участников
+                (e.ParticipantsLimit == null ||
+                e.Attendees.Count(a => !a.IsDeleted && a.AttendanceStatusId == 1) < e.ParticipantsLimit)
             );
 
             var totalCount = await query.CountAsync();

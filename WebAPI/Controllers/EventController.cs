@@ -1,7 +1,9 @@
 ﻿using ASPNETCore.Application.DTO;
+using ASPNETCore.Application.Model;
 using ASPNETCore.Application.Services;
 using ASPNETCore.Domain.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace WebAPI.Controllers
 {
@@ -80,7 +82,7 @@ namespace WebAPI.Controllers
             var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
 
             if (string.IsNullOrEmpty(userId))
-                return Unauthorized("Пользователь не авторизован");
+                userId = "";
 
             var result = await _eventService.GetPagedForUserAsync(
                 userId,
@@ -123,7 +125,18 @@ namespace WebAPI.Controllers
 
             return Ok(ev);
         }
+        [HttpGet("geocode")]
+        public async Task<ActionResult<List<GeocodeResult>>> Geocode(string query)
+        {
+            var url = $"https://nominatim.openstreetmap.org/search?format=json&q={query}";
 
+            using var httpClient = new HttpClient();
+            httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("vkr-localhost-volunteer");
+
+            var result = await httpClient.GetFromJsonAsync<List<GeocodeResult>>(url);
+
+            return Ok(result);
+        }
         [HttpPost("[action]")]
         public async Task<ActionResult<VolunteerEventDTO>> CreateEvent(
             [FromForm] CreateVolunteerEventDTO dto)
@@ -150,7 +163,19 @@ namespace WebAPI.Controllers
             var currUser = User.Identity?.IsAuthenticated == true ? User.Identity.Name : "Неавторизованный пользователь";
 
             _logger.LogInformation($"{currUser} обновляет событие {id}");
-
+            var isModerator = User.IsInRole("moderator");
+            var currentUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (isModerator)
+            {
+                if (!string.IsNullOrEmpty(currentUserId))
+                {
+                    dto.ModeratedByUserId = currentUserId;
+                }
+            }
+            else if (currentUserId != dto.UserId)
+            {
+                return BadRequest();
+            }
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 

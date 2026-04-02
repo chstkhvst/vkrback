@@ -94,7 +94,30 @@ namespace ASPNETCore.Application.Services
                 throw;
             }
         }
+        public async Task MarkNoShowAsync(int eventId)
+        {
+            try
+            {
+                var attendances = await _attendanceRepository.GetByEventIdAsync(eventId);
+                var upcomingAttendances = attendances
+                    .Where(a => a.AttendanceStatusId == 1 && !a.IsDeleted) //ожидается
+                    .ToList();
 
+                if (!upcomingAttendances.Any())
+                    return;
+
+                foreach (var attendance in upcomingAttendances)
+                {
+                    attendance.AttendanceStatusId = 4; //неявка
+                    await _attendanceRepository.UpdateAsync(attendance);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Ошибка при отметке неявок для мероприятия {eventId}");
+                throw;
+            }
+        }
         public async Task DeleteAsync(int id)
         {
             try

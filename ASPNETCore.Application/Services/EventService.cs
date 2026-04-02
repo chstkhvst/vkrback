@@ -5,6 +5,7 @@ using ASPNETCore.Infrastructure.Repositories;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
+using System.Globalization;
 
 namespace ASPNETCore.Application.Services
 {
@@ -127,8 +128,8 @@ namespace ASPNETCore.Application.Services
             {
                 Name = dto.Name,
                 Description = dto.Description,
-                Lat = dto.Lat,
-                Lng = dto.Lng,
+                Lat = double.Parse(dto.Lat, CultureInfo.InvariantCulture),
+                Lng = double.Parse(dto.Lng, CultureInfo.InvariantCulture),
                 Address = dto.Address,
                 EventDateTime = dto.EventDateTime,
                 EventPoints = dto.EventPoints,

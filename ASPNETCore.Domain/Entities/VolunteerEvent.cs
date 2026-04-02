@@ -14,7 +14,6 @@ namespace ASPNETCore.Domain.Entities
         public DateTime? EventDateTime { get; set; }
         public int EventPoints { get; set; }
         public int ParticipantsLimit { get; set; }
-        // ?
         public string? ImagePath { get; set; }
         public int EventCategoryId { get; set; }
         public int EventStatusId { get; set; }

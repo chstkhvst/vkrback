@@ -1,18 +1,16 @@
 ﻿using Microsoft.AspNetCore.Http;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
+using System.Globalization;
 namespace ASPNETCore.Application.DTO
 {
     public class CreateVolunteerEventDTO
     {
         public string Name { get; set; }
         public string Description { get; set; }
-        public double? Lat { get; set; }
-        public double? Lng { get; set; }
+        public string? Lat { get; set; }
+        public string? Lng { get; set; }
+
         public string? Address { get; set; }
         public DateTime? EventDateTime { get; set; }
         public int EventPoints { get; set; }
