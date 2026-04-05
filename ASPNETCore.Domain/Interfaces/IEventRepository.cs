@@ -14,14 +14,30 @@ namespace ASPNETCore.Domain.Interfaces
         Task<VolunteerEvent> AddAsync(VolunteerEvent volunteerEvent);
         Task DeleteAsync(int id);
         Task SoftDeleteAsync(int id);
-        Task<PaginatedResponse<VolunteerEvent>> GetPagedAsync(
+        Task<PaginatedResponse<VolunteerEvent>> GetPagedOrgAsync(
             int pageNumber,
             int pageSize,
             int? catId,
             int? cityId,
             string? keyWords,
             DateTime? dateTime);
-        Task<PaginatedResponse<VolunteerEvent>> GetPagedForUserAsync(
+        Task<PaginatedResponse<VolunteerEvent>> GetPagedOrgForUserAsync(
+            string userId,
+            int pageNumber,
+            int pageSize,
+            int? catId,
+            int? cityId,
+            string? keyWords,
+            DateTime? dateTime
+        );        
+        Task<PaginatedResponse<VolunteerEvent>> GetPagedCommunityEventsAsync(
+            int pageNumber,
+            int pageSize,
+            int? catId,
+            int? cityId,
+            string? keyWords,
+            DateTime? dateTime);
+        Task<PaginatedResponse<VolunteerEvent>> GetPagedCommunityEventsForUserAsync(
             string userId,
             int pageNumber,
             int pageSize,

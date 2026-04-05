@@ -118,6 +118,30 @@ namespace ASPNETCore.Application.Services
                 throw;
             }
         }
+        public async Task MarkCancelledAsync(int eventId)
+        {
+            try
+            {
+                var attendances = await _attendanceRepository.GetByEventIdAsync(eventId);
+                var upcomingAttendances = attendances
+                    .Where(a => a.AttendanceStatusId == 1 && !a.IsDeleted) //ожидается
+                    .ToList();
+
+                if (!upcomingAttendances.Any())
+                    return;
+
+                foreach (var attendance in upcomingAttendances)
+                {
+                    attendance.AttendanceStatusId = 2; //отменено
+                    await _attendanceRepository.UpdateAsync(attendance);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Ошибка при отмене заявок для мероприятия {eventId}");
+                throw;
+            }
+        }
         public async Task DeleteAsync(int id)
         {
             try

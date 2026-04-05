@@ -161,6 +161,27 @@ namespace WebAPI.Controllers
                 }
             }
 
+            [HttpPut("[action]/{eventId}")]
+            public async Task<ActionResult> MarkCancelled(int eventId)
+            {
+                var currUser = User.Identity?.IsAuthenticated == true
+                    ? User.Identity.Name
+                    : "Неавторизованный пользователь";
+
+                _logger.LogInformation($"{currUser} отмечает неявки на мероприятие {eventId} ");
+
+                try
+                {
+                    await _attendanceService.MarkCancelledAsync(eventId);
+                    return Ok();
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError($"Ошибка : {ex.Message}");
+                    return StatusCode(500);
+                }
+            }
+
             [HttpDelete("[action]/{id}")]
             public async Task<IActionResult> Delete(int id)
             {

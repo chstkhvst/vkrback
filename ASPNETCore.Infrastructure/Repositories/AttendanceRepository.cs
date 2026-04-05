@@ -47,7 +47,7 @@ namespace ASPNETCore.Infrastructure.Repositories
                 .Include(a => a.VolunteerEvent)
                 .Include(a => a.AttendanceStatus)
                 .Where(a => a.UserId == userId && !a.IsDeleted)
-                .OrderByDescending(a => a.VolunteerEvent.EventDateTime)
+                .OrderBy(a => a.VolunteerEvent.EventDateTime)
                 .AsNoTracking()
                 .ToListAsync();
         }
@@ -77,7 +77,7 @@ namespace ASPNETCore.Infrastructure.Repositories
         {
             return await _context.EventAttendances
                 .Include(a => a.AttendanceStatus)
-                .CountAsync(a => a.EventId == eventId && !a.IsDeleted && a.AttendanceStatusId ==1);
+                .CountAsync(a => a.EventId == eventId && !a.IsDeleted && a.AttendanceStatusId != 2);
         }
 
         public async Task<EventAttendance> AddAsync(EventAttendance att)

@@ -48,8 +48,8 @@ namespace ASPNETCore.Application.Services
             var events = await _eventRepository.GetFilteredAsync(catId, cityId, keyWords, dateTime);
             return events.Select(e => new VolunteerEventDTO(e));
         }
-
-        public async Task<PaginatedResponse<VolunteerEventDTO>> GetPagedAsync(
+        // все ивенты созданные организаторами для просмотра модерами
+        public async Task<PaginatedResponse<VolunteerEventDTO>> GetPagedOrgAsync(
             int pageNumber,
             int pageSize,
             int? catId,
@@ -57,7 +57,27 @@ namespace ASPNETCore.Application.Services
             string? keyWords,
             DateTime? dateTime)
         {
-            var result = await _eventRepository.GetPagedAsync(pageNumber, pageSize, catId, cityId, keyWords, dateTime);
+            var result = await _eventRepository.GetPagedOrgAsync(pageNumber, pageSize, catId, cityId, keyWords, dateTime);
+
+            return new PaginatedResponse<VolunteerEventDTO>
+            {
+                Items = result.Items.Select(e => new VolunteerEventDTO(e)).ToList(),
+                TotalCount = result.TotalCount,
+                PageSize = result.PageSize,
+                CurrentPage = result.CurrentPage,
+                TotalPages = result.TotalPages
+            };
+        }
+        // для получения модером всех ивентов созданных волонтерами
+        public async Task<PaginatedResponse<VolunteerEventDTO>> GetPagedCommunityEventsAsync(
+            int pageNumber,
+            int pageSize,
+            int? catId,
+            int? cityId,
+            string? keyWords,
+            DateTime? dateTime)
+        {
+            var result = await _eventRepository.GetPagedCommunityEventsAsync(pageNumber, pageSize, catId, cityId, keyWords, dateTime);
 
             return new PaginatedResponse<VolunteerEventDTO>
             {
@@ -85,7 +105,8 @@ namespace ASPNETCore.Application.Services
                 }
             }
         }
-        public async Task<PaginatedResponse<VolunteerEventDTO>> GetPagedForUserAsync(
+        // все ивенты созданные огранизаторами для просмотра в роли волонтера и организатора
+        public async Task<PaginatedResponse<VolunteerEventDTO>> GetPagedOrgForUserAsync(
             string userId,
             int pageNumber,
             int pageSize,
@@ -96,7 +117,38 @@ namespace ASPNETCore.Application.Services
         {
             await UpdateCompletedEventsAsync();
 
-            var result = await _eventRepository.GetPagedForUserAsync(
+            var result = await _eventRepository.GetPagedOrgForUserAsync(
+                userId,
+                pageNumber,
+                pageSize,
+                catId,
+                cityId,
+                keyWords,
+                dateTime
+            );
+
+            return new PaginatedResponse<VolunteerEventDTO>
+            {
+                Items = result.Items.Select(e => new VolunteerEventDTO(e)).ToList(),
+                TotalCount = result.TotalCount,
+                PageSize = result.PageSize,
+                CurrentPage = result.CurrentPage,
+                TotalPages = result.TotalPages
+            };
+        }
+        // созданные волонтерами ивенты для отображения юзерам 
+        public async Task<PaginatedResponse<VolunteerEventDTO>> GetPagedCommunityEventsForUserAsync(
+            string userId,
+            int pageNumber,
+            int pageSize,
+            int? catId,
+            int? cityId,
+            string? keyWords,
+            DateTime? dateTime)
+        {
+            await UpdateCompletedEventsAsync();
+
+            var result = await _eventRepository.GetPagedCommunityEventsForUserAsync(
                 userId,
                 pageNumber,
                 pageSize,

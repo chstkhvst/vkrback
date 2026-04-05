@@ -3,6 +3,7 @@ using ASPNETCore.Application.Model;
 using ASPNETCore.Application.Services;
 using ASPNETCore.Domain.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using System.Globalization;
 using System.Security.Claims;
 
 namespace WebAPI.Controllers
@@ -53,7 +54,7 @@ namespace WebAPI.Controllers
 
             _logger.LogInformation($"{currUser} получает страницу событий");
 
-            var result = await _eventService.GetPagedAsync(
+            var result = await _eventService.GetPagedOrgAsync(
                 pageNumber,
                 pageSize,
                 catId,
@@ -84,7 +85,7 @@ namespace WebAPI.Controllers
             if (string.IsNullOrEmpty(userId))
                 userId = "";
 
-            var result = await _eventService.GetPagedForUserAsync(
+            var result = await _eventService.GetPagedOrgForUserAsync(
                 userId,
                 pageNumber,
                 pageSize,
@@ -96,7 +97,57 @@ namespace WebAPI.Controllers
 
             return Ok(result);
         }
+        [HttpGet("[action]")]
+        public async Task<ActionResult<PaginatedResponse<VolunteerEventDTO>>> GetPagedCommunityEvents(
+            [FromQuery] int pageNumber = 1,
+            [FromQuery] int pageSize = 10,
+            [FromQuery] int? catId = null,
+            [FromQuery] int? cityId = null,
+            [FromQuery] string? keyWords = null,
+            [FromQuery] DateTime? dateTime = null)
+        {
+            var currUser = User.Identity?.IsAuthenticated == true
+                ? User.Identity.Name
+                : "Неавторизованный пользователь";
 
+            _logger.LogInformation($"{currUser} получает страницу событий сообщества");
+
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var userRole = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value;
+
+            if (string.IsNullOrEmpty(userId))
+                userId = "";
+
+            PaginatedResponse<VolunteerEventDTO> result;
+
+            if (userRole == "moderator" )
+            {
+                _logger.LogInformation($"Пользователь {currUser} с ролью волонтера получает общие события сообщества");
+                result = await _eventService.GetPagedCommunityEventsAsync(
+                    pageNumber,
+                    pageSize,
+                    catId,
+                    cityId,
+                    keyWords,
+                    dateTime
+                );
+            }
+            else
+            {
+                _logger.LogInformation($"Пользователь {currUser} с ролью {userRole} получает события от волонтеров");
+                result = await _eventService.GetPagedCommunityEventsForUserAsync(
+                    userId,
+                    pageNumber,
+                    pageSize,
+                    catId,
+                    cityId,
+                    keyWords,
+                    dateTime
+                );
+            }
+
+            return Ok(result);
+        }
         [HttpGet("[action]/{id}")]
         public async Task<ActionResult<VolunteerEventDTO>> GetEventById(int id)
         {
@@ -134,6 +185,18 @@ namespace WebAPI.Controllers
             httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("vkr-localhost-volunteer");
 
             var result = await httpClient.GetFromJsonAsync<List<GeocodeResult>>(url);
+
+            return Ok(result);
+        }
+        [HttpGet("reverse-geocode")]
+        public async Task<ActionResult<GeocodeResult>> ReverseGeocode(double lat, double lon)
+        {
+            var url = $"https://nominatim.openstreetmap.org/reverse?format=json&lat={lat.ToString(CultureInfo.InvariantCulture)}&lon={lon.ToString(CultureInfo.InvariantCulture)}";
+
+            using var httpClient = new HttpClient();
+            httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("vkr-localhost-volunteer");
+
+            var result = await httpClient.GetFromJsonAsync<GeocodeResult>(url);
 
             return Ok(result);
         }
