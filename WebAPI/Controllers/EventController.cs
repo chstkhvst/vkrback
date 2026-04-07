@@ -46,7 +46,8 @@ namespace WebAPI.Controllers
             [FromQuery] int? catId = null,
             [FromQuery] int? cityId = null,
             [FromQuery] string? keyWords = null,
-            [FromQuery] DateTime? dateTime = null)
+            [FromQuery] DateTime? dateTime = null,
+            [FromQuery] int? statusId = null)
         {
             var currUser = User.Identity?.IsAuthenticated == true
                 ? User.Identity.Name
@@ -60,7 +61,8 @@ namespace WebAPI.Controllers
                 catId,
                 cityId,
                 keyWords,
-                dateTime
+                dateTime,
+                statusId
             );
 
             return Ok(result);
@@ -104,7 +106,8 @@ namespace WebAPI.Controllers
             [FromQuery] int? catId = null,
             [FromQuery] int? cityId = null,
             [FromQuery] string? keyWords = null,
-            [FromQuery] DateTime? dateTime = null)
+            [FromQuery] DateTime? dateTime = null,
+            [FromQuery] int? statusId = null)
         {
             var currUser = User.Identity?.IsAuthenticated == true
                 ? User.Identity.Name
@@ -129,7 +132,8 @@ namespace WebAPI.Controllers
                     catId,
                     cityId,
                     keyWords,
-                    dateTime
+                    dateTime,
+                    statusId
                 );
             }
             else

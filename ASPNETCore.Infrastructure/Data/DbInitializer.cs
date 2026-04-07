@@ -61,8 +61,7 @@ namespace ASPNETCore.Infrastructure.Data
             {
                 context.ReportStatuses.AddRange(
                     new ReportStatus { ReportStatusName = "На рассмотрении" },
-                    new ReportStatus { ReportStatusName = "Одобрена" },
-                    new ReportStatus { ReportStatusName = "Отклонена" }
+                    new ReportStatus { ReportStatusName = "Рассмотрена" }
                 );
             }
 

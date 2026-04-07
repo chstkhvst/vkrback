@@ -20,7 +20,8 @@ namespace ASPNETCore.Domain.Interfaces
             int? catId,
             int? cityId,
             string? keyWords,
-            DateTime? dateTime);
+            DateTime? dateTime,
+            int? statusId);
         Task<PaginatedResponse<VolunteerEvent>> GetPagedOrgForUserAsync(
             string userId,
             int pageNumber,
@@ -36,7 +37,8 @@ namespace ASPNETCore.Domain.Interfaces
             int? catId,
             int? cityId,
             string? keyWords,
-            DateTime? dateTime);
+            DateTime? dateTime,
+            int? statusId);
         Task<PaginatedResponse<VolunteerEvent>> GetPagedCommunityEventsForUserAsync(
             string userId,
             int pageNumber,

@@ -18,7 +18,8 @@ namespace ASPNETCore.Infrastructure.Repositories
             int? catId,
             int? cityId,
             string? keyWords,
-            DateTime? dateTime)
+            DateTime? dateTime,
+            int? statusId)
         {
             if (catId.HasValue)
                 query = query.Where(e => e.EventCategoryId == catId.Value);
@@ -32,13 +33,16 @@ namespace ASPNETCore.Infrastructure.Repositories
                 query = query.Where(e => e.EventDateTime.HasValue &&
                     e.EventDateTime.Value.Date == date);
             }
+            if(statusId.HasValue)
+                query = query.Where(e=> e.EventStatusId == statusId.Value);
 
             if (!string.IsNullOrWhiteSpace(keyWords))
             {
                 var searchTerm = keyWords.Trim().ToLower();
                 query = query.Where(e =>
                     e.Name.ToLower().Contains(searchTerm) ||
-                    e.Description.ToLower().Contains(searchTerm));
+                    e.Description.ToLower().Contains(searchTerm) ||
+                    e.User.UserName.ToLower().Contains(searchTerm));
             }
 
             return query;
@@ -120,7 +124,7 @@ namespace ASPNETCore.Infrastructure.Repositories
                     .ThenInclude(a => a.User)
                 .Where(e => !e.IsDeleted)
                 .AsNoTracking();
-            query = ApplyFilters(query, catId, cityId, keyWords, dateTime);
+            query = ApplyFilters(query, catId, cityId, keyWords, dateTime, null);
 
             return await query
                 .OrderBy(e => e.EventDateTime)
@@ -133,7 +137,8 @@ namespace ASPNETCore.Infrastructure.Repositories
             int? catId,
             int? cityId,
             string? keyWords,
-            DateTime? dateTime)
+            DateTime? dateTime, 
+            int? statusId)
         {
             var query = _context.VolunteerEvents
                 .Include(e => e.EventCategory)
@@ -150,12 +155,13 @@ namespace ASPNETCore.Infrastructure.Repositories
                 .Where(e => !e.IsDeleted)
                 .Where(e => e.User.OrganizerProfile != null)
                 .AsNoTracking();
-            query = ApplyFilters(query, catId, cityId, keyWords, dateTime);
+            query = ApplyFilters(query, catId, cityId, keyWords, dateTime, statusId);
 
             var totalCount = await query.CountAsync();
 
             var items = await query
-                .OrderBy(e => e.EventDateTime)
+                .OrderBy(e => e.EventStatusId)
+                .ThenBy(e => e.EventDateTime)
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();
@@ -198,7 +204,7 @@ namespace ASPNETCore.Infrastructure.Repositories
                 .Where(e => e.User.OrganizerProfile!= null)
                 .AsNoTracking();
 
-            query = ApplyFilters(query, catId, cityId, keyWords, dateTime);
+            query = ApplyFilters(query, catId, cityId, keyWords, dateTime, null);
 
             query = query.Where(e =>
                 !e.Attendees.Any(a =>
@@ -236,7 +242,8 @@ namespace ASPNETCore.Infrastructure.Repositories
             int? catId,
             int? cityId,
             string? keyWords,
-            DateTime? dateTime)
+            DateTime? dateTime,
+            int? statusId)
         {
             var query = _context.VolunteerEvents
                 .Include(e => e.EventCategory)
@@ -253,12 +260,13 @@ namespace ASPNETCore.Infrastructure.Repositories
                 .Where(e => !e.IsDeleted)
                 .Where(e => e.User.OrganizerProfile == null)
                 .AsNoTracking();
-            query = ApplyFilters(query, catId, cityId, keyWords, dateTime);
+            query = ApplyFilters(query, catId, cityId, keyWords, dateTime, statusId);
 
             var totalCount = await query.CountAsync();
 
             var items = await query
-                .OrderBy(e => e.EventDateTime)
+                .OrderBy(e => e.EventStatusId)
+                .ThenBy(e => e.EventDateTime)
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();
@@ -301,7 +309,7 @@ namespace ASPNETCore.Infrastructure.Repositories
                 .Where(e => e.User.OrganizerProfile == null)
                 .AsNoTracking();
 
-            query = ApplyFilters(query, catId, cityId, keyWords, dateTime);
+            query = ApplyFilters(query, catId, cityId, keyWords, dateTime, null);
 
             query = query.Where(e =>
                 !e.Attendees.Any(a =>

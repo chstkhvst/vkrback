@@ -2,6 +2,7 @@
 using ASPNETCore.Domain.Interfaces;
 using ASPNETCore.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
+using System.Linq;
 
 namespace ASPNETCore.Infrastructure.Repositories
 {
@@ -34,7 +35,8 @@ namespace ASPNETCore.Infrastructure.Repositories
                 .Include(r => r.Reported)
                 .Include(r => r.ReportStatus)
                 .Where(r => !r.IsDeleted)
-                .OrderByDescending(r => r.Id)
+                .OrderBy(r => r.ReportStatusId)
+                .ThenBy(r => r.ReportedUserId)
                 .AsNoTracking()
                 .ToListAsync();
         }
@@ -47,7 +49,8 @@ namespace ASPNETCore.Infrastructure.Repositories
                     .ThenInclude(r => r.OrganizerProfile)
                 .Include(r => r.ReportStatus)
                 .Where(r => r.SenderUserId == senderId && !r.IsDeleted)
-                .OrderByDescending(r => r.Id)
+                .OrderBy(r => r.ReportStatusId)
+                .ThenBy(r => r.ReportedUserId)
                 .AsNoTracking()
                 .ToListAsync();
         }
@@ -60,7 +63,7 @@ namespace ASPNETCore.Infrastructure.Repositories
                     .ThenInclude(s => s.OrganizerProfile)
                 .Include(r => r.ReportStatus)
                 .Where(r => r.ReportedUserId == reportedId && !r.IsDeleted)
-                .OrderByDescending(r => r.Id)
+                .OrderBy(r => r.ReportStatusId)
                 .AsNoTracking()
                 .ToListAsync();
         }
@@ -70,7 +73,7 @@ namespace ASPNETCore.Infrastructure.Repositories
                 .Include(r => r.Sender)
                 .Include(r => r.Reported)
                 .Where(r => r.ReportStatusId == statusId && !r.IsDeleted)
-                .OrderByDescending(r => r.Id)
+                .OrderByDescending(r => r.ReportedUserId)
                 .AsNoTracking()
                 .ToListAsync();
         }
@@ -83,9 +86,48 @@ namespace ASPNETCore.Infrastructure.Repositories
                 .Where(r => r.SenderUserId == senderId &&
                            r.ReportedUserId == reportedId &&
                            !r.IsDeleted)
-                .OrderByDescending(r => r.Id)
+                .OrderBy(r => r.ReportStatusId)
                 .AsNoTracking()
                 .ToListAsync();
+        }
+        public async Task<IEnumerable<ReportGroup>> GetGroupedReportsAsync(int? statusId = null, string? keywords = null)
+        {
+            var query = _context.UserReports
+                .Include(r => r.Sender)
+                .Include(r => r.Reported)
+                .Include(r => r.ReportStatus)
+                .Where(r => !r.IsDeleted);
+
+            if (statusId != null)
+            {
+                query = query.Where(r => r.ReportStatusId == statusId);
+            }
+
+            if (!string.IsNullOrWhiteSpace(keywords))
+            {
+                var lower = keywords.ToLower();
+
+                query = query.Where(r =>
+                    r.Reported.UserName.ToLower().Contains(lower) ||
+                    r.Reported.FullName.ToLower().Contains(lower) 
+                );
+            }
+            var reports = await query
+                .AsNoTracking()
+                .ToListAsync();
+
+            var grouped = reports
+                .GroupBy(r => r.ReportedUserId)
+                .Select(g => new ReportGroup
+                {
+                    ReportedUserId = g.Key,
+                    ReportedUser = g.First().Reported, 
+                    Count = g.Count(),
+                    Reports = g.ToList()
+                })
+                .OrderByDescending(g => g.Count);
+
+            return grouped;
         }
         public async Task<UserReport> AddAsync(UserReport rep)
         {

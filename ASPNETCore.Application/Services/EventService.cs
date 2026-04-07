@@ -55,9 +55,10 @@ namespace ASPNETCore.Application.Services
             int? catId,
             int? cityId,
             string? keyWords,
-            DateTime? dateTime)
+            DateTime? dateTime, 
+            int? statusId)
         {
-            var result = await _eventRepository.GetPagedOrgAsync(pageNumber, pageSize, catId, cityId, keyWords, dateTime);
+            var result = await _eventRepository.GetPagedOrgAsync(pageNumber, pageSize, catId, cityId, keyWords, dateTime, statusId);
 
             return new PaginatedResponse<VolunteerEventDTO>
             {
@@ -75,9 +76,10 @@ namespace ASPNETCore.Application.Services
             int? catId,
             int? cityId,
             string? keyWords,
-            DateTime? dateTime)
+            DateTime? dateTime,
+            int? statusId)
         {
-            var result = await _eventRepository.GetPagedCommunityEventsAsync(pageNumber, pageSize, catId, cityId, keyWords, dateTime);
+            var result = await _eventRepository.GetPagedCommunityEventsAsync(pageNumber, pageSize, catId, cityId, keyWords, dateTime, statusId);
 
             return new PaginatedResponse<VolunteerEventDTO>
             {

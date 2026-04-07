@@ -4,7 +4,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
+public class ReportGroup
+{
+    public string ReportedUserId { get; set; }
+    public User ReportedUser { get; set; }
+    public int Count { get; set; }
+    public List<UserReport> Reports { get; set; }
+}
 namespace ASPNETCore.Domain.Interfaces
 {
     public interface IReportRepository
@@ -13,6 +19,7 @@ namespace ASPNETCore.Domain.Interfaces
         Task<IEnumerable<UserReport>> GetAllAsync();
         Task<IEnumerable<UserReport>> GetBySenderIdAsync(string senderId);
         Task<IEnumerable<UserReport>> GetByReportedIdAsync(string reportedId);
+        Task<IEnumerable<ReportGroup>> GetGroupedReportsAsync(int? statusId = null, string? keywords = null);
         Task<UserReport> AddAsync(UserReport rep);
         Task<UserReport>UpdateAsync(UserReport rep);
         Task DeleteAsync(int id);

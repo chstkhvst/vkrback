@@ -102,7 +102,7 @@ namespace WebAPI.Controllers
         }
 
         [HttpGet("[action]/{id}")]
-        public async Task<ActionResult<EventStatus>> GetReportStatus(int id)
+        public async Task<ActionResult<ReportStatus>> GetReportStatus(int id)
         {
             var currUser = User.Identity.IsAuthenticated ? User.Identity.Name : "Неавторизованный пользователь";
             _logger.LogInformation($"{currUser} получает статус жалобы с id {id}");
@@ -111,7 +111,7 @@ namespace WebAPI.Controllers
             return Ok(resStatus);
         }
         [HttpGet("[action]")]
-        public async Task<ActionResult<IEnumerable<ReportStatus>>> GetVolunteerRanks()
+        public async Task<ActionResult<IEnumerable<VolunteerRank>>> GetVolunteerRanks()
         {
             var currUser = User.Identity.IsAuthenticated ? User.Identity.Name : "Неавторизованный пользователь";
             _logger.LogInformation($"{currUser} получает ранг пользователя");
@@ -120,7 +120,7 @@ namespace WebAPI.Controllers
         }
 
         [HttpGet("[action]/{id}")]
-        public async Task<ActionResult<EventStatus>> GetVolunteerRank(int id)
+        public async Task<ActionResult<VolunteerRank>> GetVolunteerRank(int id)
         {
             var currUser = User.Identity.IsAuthenticated ? User.Identity.Name : "Неавторизованный пользователь";
             _logger.LogInformation($"{currUser} получает ранг пользователя с id {id}");

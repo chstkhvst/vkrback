@@ -8,11 +8,13 @@ namespace ASPNETCore.Application.Services
     public class ReportService
     {
         private readonly IReportRepository _reportRepository;
+        private readonly IBanRepository _banRepository;
         private readonly ILogger<ReportService> _logger;
 
-        public ReportService(IReportRepository reportRepository, ILogger<ReportService> logger)
+        public ReportService(IReportRepository reportRepository, IBanRepository banRepository, ILogger<ReportService> logger)
         {
             _reportRepository = reportRepository;
+            _banRepository = banRepository;
             _logger = logger;
         }
 
@@ -70,7 +72,20 @@ namespace ASPNETCore.Application.Services
                 .Where(r => r != null)
                 .Select(r => new UserReportDTO(r));
         }
+        public async Task<IEnumerable<ReportGroupDTO>> GetGroupedReportsAsync(int? statusId = null, string? keywords = null)
+        {
+            var groups = await _reportRepository.GetGroupedReportsAsync(statusId, keywords);
 
+            return groups.Select(g => new ReportGroupDTO
+            {
+                ReportedUserId = g.ReportedUserId,
+                ReportedUser = g.ReportedUser != null ? new UserDTO(g.ReportedUser) : null,
+                Count = g.Count,
+                Reports = g.Reports
+                    .Select(r => new UserReportDTO(r))
+                    .ToList()
+            });
+        }
         public async Task<UserReportDTO> AddAsync(CreateReportDTO dto)
         {
             var entity = new UserReport
@@ -94,6 +109,7 @@ namespace ASPNETCore.Application.Services
                 SenderUserId = dto.SenderUserId,
                 ReportedUserId = dto.ReportedUserId,
                 ReportReason = dto.ReportReason,
+                ModeratedByUserId = dto.ModeratedByUserId,
                 ReportStatusId = dto.ReportStatusId,
                 IsDeleted = dto.IsDeleted
             };
@@ -108,6 +124,7 @@ namespace ASPNETCore.Application.Services
                 _logger.LogError(ex, $"Error updating report {dto.Id}");
                 throw;
             }
+            
         }
 
         public async Task DeleteAsync(int id)

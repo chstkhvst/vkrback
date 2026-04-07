@@ -1,6 +1,7 @@
 ﻿using ASPNETCore.Application.DTO;
 using ASPNETCore.Application.Services;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace WebAPI.Controllers
 {
@@ -15,6 +16,19 @@ namespace WebAPI.Controllers
         {
             _reportService = reportService;
             _logger = logger;
+        }
+        [HttpGet("[action]")]
+        public async Task<ActionResult<IEnumerable<ReportGroupDTO>>> GetGroupedReports([FromQuery] int? statusId, [FromQuery] string? keywords)
+        {
+            var currUser = User.Identity?.IsAuthenticated == true
+                ? User.Identity.Name
+                : "Неавторизованный пользователь";
+
+            _logger.LogInformation($"{currUser} получает сгруппированные жалобы (statusId: {statusId})");
+
+            var groups = await _reportService.GetGroupedReportsAsync(statusId, keywords);
+
+            return Ok(groups);
         }
 
         [HttpGet("[action]")]
@@ -48,7 +62,7 @@ namespace WebAPI.Controllers
         }
 
         [HttpGet("[action]/{senderId}")]
-        public async Task<ActionResult<IEnumerable<UserReportDTO>>> GetBySender(string senderId)
+        public async Task<ActionResult<IEnumerable<UserReportDTO>>> GetReportBySenderId(string senderId)
         {
             var currUser = User.Identity?.IsAuthenticated == true
                 ? User.Identity.Name
@@ -61,7 +75,7 @@ namespace WebAPI.Controllers
         }
 
         [HttpGet("[action]/{reportedId}")]
-        public async Task<ActionResult<IEnumerable<UserReportDTO>>> GetByReported(string reportedId)
+        public async Task<ActionResult<IEnumerable<UserReportDTO>>> GetReportByReportedId(string reportedId)
         {
             var currUser = User.Identity?.IsAuthenticated == true
                 ? User.Identity.Name
@@ -111,7 +125,15 @@ namespace WebAPI.Controllers
                 : "Неавторизованный пользователь";
 
             _logger.LogInformation($"{currUser} обновляет жалобу {id}");
-
+            var isModerator = User.IsInRole("moderator");
+            var currentUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (isModerator)
+            {
+                if (!string.IsNullOrEmpty(currentUserId))
+                {
+                    dto.ModeratedByUserId = currentUserId;
+                }
+            }
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
