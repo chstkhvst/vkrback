@@ -1,6 +1,7 @@
 ﻿using ASPNETCore.Application.DTO;
 using ASPNETCore.Application.Services;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace WebAPI.Controllers
 {
@@ -17,6 +18,20 @@ namespace WebAPI.Controllers
             _logger = logger;
         }
 
+        [HttpGet("[action]/{userId}")]
+        public async Task<ActionResult<bool>> IsUserBanned(string userId)
+        {
+            try
+            {
+                var isBanned = await _banService.IsUserBannedAsync(userId);
+                return Ok(isBanned);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Ошибка при проверке бана пользователя {userId}: {ex.Message}");
+                return StatusCode(500, new { message = "Ошибка при проверке статуса бана" });
+            }
+        }
         [HttpGet("[action]")]
         public async Task<ActionResult<IEnumerable<BanDTO>>> GetBans()
         {
@@ -46,7 +61,11 @@ namespace WebAPI.Controllers
             var currUser = User.Identity?.IsAuthenticated == true
                 ? User.Identity.Name
                 : "Неавторизованный пользователь";
-
+            var currentUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (!string.IsNullOrEmpty(currentUserId))
+            {
+                dto.ModerId = currentUserId;
+            }
             _logger.LogInformation($"{currUser} создает бан");
 
             if (!ModelState.IsValid)

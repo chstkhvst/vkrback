@@ -116,6 +116,26 @@ namespace WebAPI.Controllers
 
             return Ok(created);
         }
+        [HttpPut("[action]/{userId}")]
+        public async Task<ActionResult> MarkReportsClosed(string userId)
+        {
+            var currUser = User.Identity?.IsAuthenticated == true
+                ? User.Identity.Name
+                : "Неавторизованный пользователь";
+            var currentUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            _logger.LogInformation($"{currUser} меняет статус всех нерассмотренных жалоб для {userId} ");
+
+            try
+            {
+                await _reportService.MarkReportsClosedAsync(userId, currentUserId);
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Ошибка : {ex.Message}");
+                return StatusCode(500);
+            }
+        }
 
         [HttpPut("[action]/{id}")]
         public async Task<ActionResult<UserReportDTO>> UpdateReport(int id, UserReportDTO dto)

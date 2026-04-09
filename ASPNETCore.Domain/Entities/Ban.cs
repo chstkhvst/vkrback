@@ -8,6 +8,7 @@ namespace ASPNETCore.Domain.Entities
         [Key] public int Id { get; set; }
         public string BannedUserId { get; set; } = null!;
         public string ModerId { get; set; }
+        public string BanReason { get; set; }
         public bool IsActive { get; set; }
         public bool IsDeleted { get; set; }
         public virtual User Moder { get; set; }

@@ -24,6 +24,7 @@ namespace ASPNETCore.Application.DTO
         }
         public int Id { get; set; }
         public string BannedUserId { get; set; }
+        public string BanReason { get; set; }
         public string ModerId { get; set; }
         public bool IsActive { get; set; }
         public bool IsDeleted { get; set; }

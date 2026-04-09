@@ -125,7 +125,8 @@ namespace ASPNETCore.Infrastructure.Repositories
                     Count = g.Count(),
                     Reports = g.ToList()
                 })
-                .OrderByDescending(g => g.Count);
+                .OrderByDescending(g => g.Reports.Count(r => r.ReportStatusId == 1))
+                .ThenByDescending(g => g.Count);
 
             return grouped;
         }

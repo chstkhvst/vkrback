@@ -9,7 +9,8 @@ namespace ASPNETCore.Application.DTO
     public class CreateBanDTO
     {
         public string BannedUserId { get; set; }
-        public string ModerId { get; set; }
+        public string BanReason { get; set; }
+        public string? ModerId { get; set; }
         public bool IsActive { get; set; }= true;
         public bool IsDeleted { get; set; } = false;
     }

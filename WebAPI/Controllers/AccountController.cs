@@ -34,18 +34,38 @@ public class AccountController : ControllerBase
 
         return Ok(loginResponse);
     }
+    //[HttpPost("login")]
+    //public async Task<ActionResult<AuthResponse>> Login(LoginModel model)
+    //{
+    //    if (!ModelState.IsValid)
+    //        return BadRequest(ModelState);
+
+    //    var response = await _accountService.Login(model);
+
+    //    if (response == null)
+    //        return Unauthorized();
+
+    //    return Ok(response);
+    //}
     [HttpPost("login")]
     public async Task<ActionResult<AuthResponse>> Login(LoginModel model)
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
-        var response = await _accountService.Login(model);
+        try
+        {
+            var response = await _accountService.Login(model);
 
-        if (response == null)
-            return Unauthorized();
+            if (response == null)
+                return Unauthorized("Invalid credentials");
 
-        return Ok(response);
+            return Ok(response);
+        }
+        catch (Exception ex) when (ex.Message == "User is banned")
+        {
+            return Unauthorized("User is banned");
+        }
     }
 
     [Authorize]

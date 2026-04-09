@@ -1,6 +1,7 @@
 ﻿using ASPNETCore.Application.DTO;
 using ASPNETCore.Domain.Entities;
 using ASPNETCore.Domain.Interfaces;
+using ASPNETCore.Infrastructure.Repositories;
 using Microsoft.Extensions.Logging;
 
 namespace ASPNETCore.Application.Services
@@ -100,7 +101,31 @@ namespace ASPNETCore.Application.Services
             var created = await _reportRepository.AddAsync(entity);
             return new UserReportDTO(created);
         }
+        public async Task MarkReportsClosedAsync(string userId, string moderId)
+        {
+            try
+            {
+                var reports = await _reportRepository.GetByReportedIdAsync(userId);
+                var reportsToClose = reports
+                    .Where(r => r.ReportStatusId == 1 && !r.IsDeleted) //на рассмотрении
+                    .ToList();
 
+                if (!reportsToClose.Any())
+                    return;
+
+                foreach (var rep in reportsToClose)
+                {
+                    rep.ReportStatusId = 2; //отменено
+                    rep.ModeratedByUserId = moderId;
+                    await _reportRepository.UpdateAsync(rep);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Ошибка при отметке жалоб {userId}");
+                throw;
+            }
+        }
         public async Task<UserReportDTO> UpdateAsync(UserReportDTO dto)
         {
             var entity = new UserReport

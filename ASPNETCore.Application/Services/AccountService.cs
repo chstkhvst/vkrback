@@ -12,6 +12,7 @@ namespace ASPNETCore.Application.Services
 {
     public class AccountService
     {
+        private readonly BanService _banService;
         private readonly UserManager<User> _userManager;
         private readonly SignInManager<User> _signInManager;
         private readonly IConfiguration _configuration;
@@ -19,11 +20,13 @@ namespace ASPNETCore.Application.Services
         public AccountService(
             UserManager<User> userManager,
             SignInManager<User> signInManager,
-            IConfiguration configuration)
+            IConfiguration configuration,
+            BanService banService)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _configuration = configuration;
+            _banService = banService;
         }
 
         public async Task<IdentityResult> Register(RegisterModel model)
@@ -64,21 +67,55 @@ namespace ASPNETCore.Application.Services
             return result;
         }
 
+        //public async Task<AuthResponse?> Login(LoginModel model)
+        //{
+        //    var result = await _signInManager.PasswordSignInAsync(
+        //        model.UserName,
+        //        model.Password,
+        //        false,
+        //        false);
+
+        //    if (!result.Succeeded)
+        //        return null;
+
+        //    var user = await _userManager.Users
+        //        .Include(u => u.VolunteerProfile)
+        //        .Include(u => u.OrganizerProfile)
+        //        .FirstOrDefaultAsync(u => u.UserName == model.UserName);
+
+        //    var token = await GenerateJwtToken(user);
+        //    var roles = await _userManager.GetRolesAsync(user);
+
+        //    return new AuthResponse
+        //    {
+        //        Token = token,
+        //        User = new UserDTO(user),
+        //        Role = roles.FirstOrDefault()
+        //    };
+        //}
         public async Task<AuthResponse?> Login(LoginModel model)
         {
-            var result = await _signInManager.PasswordSignInAsync(
-                model.UserName,
-                model.Password,
-                false,
-                false);
-
-            if (!result.Succeeded)
-                return null;
-
             var user = await _userManager.Users
                 .Include(u => u.VolunteerProfile)
                 .Include(u => u.OrganizerProfile)
                 .FirstOrDefaultAsync(u => u.UserName == model.UserName);
+
+            if (user == null)
+                return null;
+            var isBanned = await _banService.IsUserBannedAsync(user.Id);
+            if (isBanned)
+                throw new Exception("User is banned");
+
+            // 🔥 ВОЗВРАЩАЕМ PasswordSignInAsync
+            var result = await _signInManager.PasswordSignInAsync(
+                model.UserName,
+                model.Password,
+                false,
+                false
+            );
+
+            if (!result.Succeeded)
+                return null;
 
             var token = await GenerateJwtToken(user);
             var roles = await _userManager.GetRolesAsync(user);
@@ -90,7 +127,6 @@ namespace ASPNETCore.Application.Services
                 Role = roles.FirstOrDefault()
             };
         }
-
         public async Task Logout()
         {
             await _signInManager.SignOutAsync();

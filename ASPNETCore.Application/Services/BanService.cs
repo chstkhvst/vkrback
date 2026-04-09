@@ -8,12 +8,14 @@ namespace ASPNETCore.Application.Services
     public class BanService
     {
         private readonly IBanRepository _banRepository;
+        private readonly ReportService _reportService;
         private readonly ILogger<BanService> _logger;
 
-        public BanService(IBanRepository banRepository, ILogger<BanService> logger)
+        public BanService(IBanRepository banRepository, ReportService reportService, ILogger<BanService> logger)
         {
             _banRepository = banRepository;
             _logger = logger;
+            _reportService = reportService;
         }
 
         public async Task<bool> IsUserBannedAsync(string userId)
@@ -50,16 +52,26 @@ namespace ASPNETCore.Application.Services
 
         public async Task<BanDTO> AddAsync(CreateBanDTO dto)
         {
-            var entity = new Ban
+            try
             {
-                BannedUserId = dto.BannedUserId,
-                ModerId = dto.ModerId,
-                IsActive = dto.IsActive,
-                IsDeleted = dto.IsDeleted
-            };
+                var entity = new Ban
+                {
+                    BannedUserId = dto.BannedUserId,
+                    ModerId = dto.ModerId,
+                    BanReason = dto.BanReason,
+                    IsActive = dto.IsActive,
+                    IsDeleted = dto.IsDeleted
+                };
 
-            var created = await _banRepository.AddAsync(entity);
-            return new BanDTO(created);
+                var created = await _banRepository.AddAsync(entity);
+                await _reportService.MarkReportsClosedAsync(dto.BannedUserId, dto.ModerId);
+                return new BanDTO(created);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Ошибка при создании бана для пользователя {dto.BannedUserId}");
+                throw;
+            }
         }
 
         public async Task<BanDTO> UpdateAsync(BanDTO dto)
