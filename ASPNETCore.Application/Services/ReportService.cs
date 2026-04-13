@@ -94,8 +94,9 @@ namespace ASPNETCore.Application.Services
                 SenderUserId = dto.SenderUserId,
                 ReportedUserId = dto.ReportedUserId,
                 ReportReason = dto.ReportReason,
-                ReportStatusId = dto.ReportStatusId,
-                IsDeleted = dto.IsDeleted
+                ReportStatusId = 1,
+                ModeratedByUserId = " ", 
+                IsDeleted = false
             };
 
             var created = await _reportRepository.AddAsync(entity);

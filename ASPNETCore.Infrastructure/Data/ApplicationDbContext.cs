@@ -139,6 +139,13 @@ namespace ASPNETCore.Infrastructure.Data
                 .HasForeignKey(r => r.ReportedUserId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            // UserReport - ModeratedByUserId
+            modelBuilder.Entity<UserReport>()
+                .HasOne(r => r.Moder)
+                .WithMany()
+                .HasForeignKey(r => r.ModeratedByUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
             // UserReport - Status
             modelBuilder.Entity<UserReport>()
                 .HasOne(r => r.ReportStatus)

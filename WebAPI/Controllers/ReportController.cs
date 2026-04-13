@@ -106,7 +106,11 @@ namespace WebAPI.Controllers
             var currUser = User.Identity?.IsAuthenticated == true
                 ? User.Identity.Name
                 : "Неавторизованный пользователь";
-
+            var currentUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (!string.IsNullOrEmpty(currentUserId))
+            {
+                dto.SenderUserId = currentUserId;
+            }
             _logger.LogInformation($"{currUser} создает жалобу");
 
             if (!ModelState.IsValid)
