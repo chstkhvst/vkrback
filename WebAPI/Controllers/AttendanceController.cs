@@ -139,6 +139,26 @@ namespace WebAPI.Controllers
 
                 return Ok(updated);
             }
+            [HttpPut("[action]/{attendanceId}")]
+            public async Task<ActionResult> MarkAttendance(int attendanceId)
+            {
+                var currUser = User.Identity?.IsAuthenticated == true
+                    ? User.Identity.Name
+                    : "Неавторизованный пользователь";
+
+                _logger.LogInformation($"{currUser} отмечает посещение {attendanceId}");
+
+                try
+                {
+                    var result = await _attendanceService.MarkAttendanceAsync(attendanceId);
+                    return Ok(result);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, $"Ошибка при отметке посещения {attendanceId}");
+                    return StatusCode(500);
+                }
+            }
 
             [HttpPut("[action]/{eventId}")]
             public async Task<ActionResult> MarkNoShow(int eventId)

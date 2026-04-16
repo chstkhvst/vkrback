@@ -21,8 +21,7 @@ namespace ASPNETCore.Infrastructure.Repositories
                 .Include(a => a.AttendanceStatus)
                 .Include(a => a.User)
                     .ThenInclude(u => u.VolunteerProfile)
-                .Include(a => a.User)
-                    .ThenInclude(u => u.OrganizerProfile)
+                        .ThenInclude(v => v.Rank)
                 .FirstOrDefaultAsync(a => a.Id == id && !a.IsDeleted);
         }
 

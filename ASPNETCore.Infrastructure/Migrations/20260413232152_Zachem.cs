@@ -5,7 +5,7 @@
 namespace ASPNETCore.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class FixKeys : Migration
+    public partial class Zachem : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -52,18 +52,6 @@ namespace ASPNETCore.Infrastructure.Migrations
                 column: "UserId",
                 principalTable: "AspNetUsers",
                 principalColumn: "Id");
-
-            migrationBuilder.DropForeignKey(
-                name: "FK_VolunteerProfiles_VolunteerRanks_VolunteerRankId",
-                table: "VolunteerProfiles");
-
-            migrationBuilder.DropIndex(
-                name: "IX_VolunteerProfiles_VolunteerRankId",
-                table: "VolunteerProfiles");
-
-            migrationBuilder.DropColumn(
-                name: "VolunteerRankId",
-                table: "VolunteerProfiles");
         }
 
         /// <inheritdoc />
@@ -105,24 +93,6 @@ namespace ASPNETCore.Infrastructure.Migrations
                 table: "UserReports",
                 column: "ModerId",
                 principalTable: "AspNetUsers",
-                principalColumn: "Id");
-
-            migrationBuilder.AddColumn<int>(
-                name: "VolunteerRankId",
-                table: "VolunteerProfiles",
-                type: "int",
-                nullable: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_VolunteerProfiles_VolunteerRankId",
-                table: "VolunteerProfiles",
-                column: "VolunteerRankId");
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_VolunteerProfiles_VolunteerRanks_VolunteerRankId",
-                table: "VolunteerProfiles",
-                column: "VolunteerRankId",
-                principalTable: "VolunteerRanks",
                 principalColumn: "Id");
         }
     }

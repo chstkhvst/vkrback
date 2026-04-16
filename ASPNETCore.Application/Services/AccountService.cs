@@ -105,8 +105,6 @@ namespace ASPNETCore.Application.Services
             var isBanned = await _banService.IsUserBannedAsync(user.Id);
             if (isBanned)
                 throw new Exception("User is banned");
-
-            // 🔥 ВОЗВРАЩАЕМ PasswordSignInAsync
             var result = await _signInManager.PasswordSignInAsync(
                 model.UserName,
                 model.Password,

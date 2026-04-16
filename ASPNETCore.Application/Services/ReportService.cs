@@ -95,7 +95,7 @@ namespace ASPNETCore.Application.Services
                 ReportedUserId = dto.ReportedUserId,
                 ReportReason = dto.ReportReason,
                 ReportStatusId = 1,
-                ModeratedByUserId = " ", 
+                ModeratedByUserId = null, 
                 IsDeleted = false
             };
 

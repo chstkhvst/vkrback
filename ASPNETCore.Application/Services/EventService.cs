@@ -92,7 +92,7 @@ namespace ASPNETCore.Application.Services
         }
         private async Task UpdateCompletedEventsAsync()
         {
-            var now = DateTime.UtcNow;
+            var now = DateTime.UtcNow.ToLocalTime();
 
             var eventsToUpdate = await _eventRepository.GetAllAsync();
 
@@ -185,7 +185,7 @@ namespace ASPNETCore.Application.Services
                 Lat = double.Parse(dto.Lat, CultureInfo.InvariantCulture),
                 Lng = double.Parse(dto.Lng, CultureInfo.InvariantCulture),
                 Address = dto.Address,
-                EventDateTime = dto.EventDateTime,
+                EventDateTime = dto.EventDateTime?.ToLocalTime(),
                 EventPoints = dto.EventPoints,
                 ParticipantsLimit = dto.ParticipantsLimit,
                 EventCategoryId = dto.EventCategoryId,
@@ -230,7 +230,7 @@ namespace ASPNETCore.Application.Services
                 Lat = dto.Lat,
                 Lng = dto.Lng,
                 Address = dto.Address,
-                EventDateTime = dto.EventDateTime,
+                EventDateTime = dto.EventDateTime?.ToLocalTime(),
                 EventPoints = dto.EventPoints,
                 ParticipantsLimit = dto.ParticipantsLimit,
                 ImagePath = dto.ImagePath,

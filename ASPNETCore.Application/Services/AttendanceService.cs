@@ -1,6 +1,7 @@
 ﻿using ASPNETCore.Application.DTO;
 using ASPNETCore.Domain.Entities;
 using ASPNETCore.Domain.Interfaces;
+using ASPNETCore.Infrastructure.Repositories;
 using Microsoft.Extensions.Logging;
 
 namespace ASPNETCore.Application.Services
@@ -8,13 +9,16 @@ namespace ASPNETCore.Application.Services
     public class AttendanceService
     {
         private readonly IAttendanceRepositiory _attendanceRepository;
+        private readonly ICatalogRepository _catalogRepository;
         private readonly ILogger<AttendanceService> _logger;
 
         public AttendanceService(
             IAttendanceRepositiory attendanceRepository,
+            ICatalogRepository catalogRepository,
             ILogger<AttendanceService> logger)
         {
             _attendanceRepository = attendanceRepository;
+            _catalogRepository = catalogRepository;
             _logger = logger;
         }
 
@@ -91,6 +95,44 @@ namespace ASPNETCore.Application.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"Error updating attendance {dto.Id}");
+                throw;
+            }
+        }
+        public async Task<EventAttendanceDTO> MarkAttendanceAsync(int attendanceId)
+        {
+            try
+            {
+                var attendance = await _attendanceRepository.GetByIdAsync(attendanceId);
+
+                if (attendance == null)
+                    throw new Exception($"Attendance {attendanceId} not found");
+
+                if (attendance.AttendanceStatusId == 3)
+                    return new EventAttendanceDTO(attendance);
+                //состоялось
+                attendance.AttendanceStatusId = 3;
+
+                //начисляем баллы
+                var eventPoints = attendance.VolunteerEvent?.EventPoints ?? 0;
+                var profile = attendance.User?.VolunteerProfile;
+                if (profile == null)
+                    throw new Exception("User profile not found");
+                profile.Points += eventPoints;
+
+                //обновляем ранг
+                var newRank = await _catalogRepository.GetRankForPointsAsync(profile.Points);
+
+                if (newRank != null && profile.RankId != newRank.Id)
+                {
+                    profile.RankId = newRank.Id;
+                }
+                await _attendanceRepository.UpdateAsync(attendance);
+
+                return new EventAttendanceDTO(attendance);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Ошибка при отметке посещения {attendanceId}");
                 throw;
             }
         }

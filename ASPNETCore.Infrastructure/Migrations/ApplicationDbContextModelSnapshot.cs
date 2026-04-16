@@ -39,7 +39,7 @@ namespace ASPNETCore.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("AttendanceStatuses", (string)null);
+                    b.ToTable("AttendanceStatuses");
                 });
 
             modelBuilder.Entity("ASPNETCore.Domain.Entities.Ban", b =>
@@ -74,7 +74,7 @@ namespace ASPNETCore.Infrastructure.Migrations
 
                     b.HasIndex("ModerId");
 
-                    b.ToTable("Bans", (string)null);
+                    b.ToTable("Bans");
                 });
 
             modelBuilder.Entity("ASPNETCore.Domain.Entities.City", b =>
@@ -97,7 +97,7 @@ namespace ASPNETCore.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Cities", (string)null);
+                    b.ToTable("Cities");
                 });
 
             modelBuilder.Entity("ASPNETCore.Domain.Entities.EventAttendance", b =>
@@ -130,7 +130,7 @@ namespace ASPNETCore.Infrastructure.Migrations
                     b.HasIndex("EventId", "UserId")
                         .IsUnique();
 
-                    b.ToTable("EventAttendances", (string)null);
+                    b.ToTable("EventAttendances");
                 });
 
             modelBuilder.Entity("ASPNETCore.Domain.Entities.EventCategory", b =>
@@ -150,7 +150,7 @@ namespace ASPNETCore.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("EventCategories", (string)null);
+                    b.ToTable("EventCategories");
                 });
 
             modelBuilder.Entity("ASPNETCore.Domain.Entities.EventStatus", b =>
@@ -170,7 +170,7 @@ namespace ASPNETCore.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("EventStatuses", (string)null);
+                    b.ToTable("EventStatuses");
                 });
 
             modelBuilder.Entity("ASPNETCore.Domain.Entities.OrganizerProfile", b =>
@@ -188,7 +188,7 @@ namespace ASPNETCore.Infrastructure.Migrations
 
                     b.HasKey("UserId");
 
-                    b.ToTable("OrganizerProfiles", (string)null);
+                    b.ToTable("OrganizerProfiles");
                 });
 
             modelBuilder.Entity("ASPNETCore.Domain.Entities.ReportStatus", b =>
@@ -208,7 +208,7 @@ namespace ASPNETCore.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("ReportStatuses", (string)null);
+                    b.ToTable("ReportStatuses");
                 });
 
             modelBuilder.Entity("ASPNETCore.Domain.Entities.User", b =>
@@ -329,7 +329,7 @@ namespace ASPNETCore.Infrastructure.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("UserReports", (string)null);
+                    b.ToTable("UserReports");
                 });
 
             modelBuilder.Entity("ASPNETCore.Domain.Entities.VolunteerEvent", b =>
@@ -400,7 +400,7 @@ namespace ASPNETCore.Infrastructure.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("VolunteerEvents", (string)null);
+                    b.ToTable("VolunteerEvents");
                 });
 
             modelBuilder.Entity("ASPNETCore.Domain.Entities.VolunteerProfile", b =>
@@ -423,7 +423,7 @@ namespace ASPNETCore.Infrastructure.Migrations
 
                     b.HasIndex("VolunteerRankId");
 
-                    b.ToTable("VolunteerProfiles", (string)null);
+                    b.ToTable("VolunteerProfiles");
                 });
 
             modelBuilder.Entity("ASPNETCore.Domain.Entities.VolunteerRank", b =>
@@ -446,7 +446,7 @@ namespace ASPNETCore.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("VolunteerRanks", (string)null);
+                    b.ToTable("VolunteerRanks");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>

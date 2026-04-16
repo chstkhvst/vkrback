@@ -73,6 +73,13 @@ namespace ASPNETCore.Infrastructure.Repositories
                 .AsNoTracking()
                 .FirstOrDefaultAsync(r => r.Id == id);
         }
+        public async Task<VolunteerRank?> GetRankForPointsAsync(int points)
+        {
+            return await _context.VolunteerRanks
+                .Where(r => r.PointsRequired <= points)
+                .OrderByDescending(r => r.PointsRequired)
+                .FirstOrDefaultAsync();
+        }
         public async Task<IEnumerable<City>> GetCitiesAsync()
         {
             return await _context.Cities
