@@ -1,6 +1,7 @@
 ﻿using ASPNETCore.Application.DTO;
 using ASPNETCore.Application.Model;
 using ASPNETCore.Application.Services;
+using ASPNETCore.Domain.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -34,19 +35,6 @@ public class AccountController : ControllerBase
 
         return Ok(loginResponse);
     }
-    //[HttpPost("login")]
-    //public async Task<ActionResult<AuthResponse>> Login(LoginModel model)
-    //{
-    //    if (!ModelState.IsValid)
-    //        return BadRequest(ModelState);
-
-    //    var response = await _accountService.Login(model);
-
-    //    if (response == null)
-    //        return Unauthorized();
-
-    //    return Ok(response);
-    //}
     [HttpPost("login")]
     public async Task<ActionResult<AuthResponse>> Login(LoginModel model)
     {
@@ -89,7 +77,8 @@ public class AccountController : ControllerBase
     }
     [Authorize]
     [HttpPut("profile")]
-    public async Task<IActionResult> UpdateProfile(UpdateProfileModel model)
+    [Consumes("multipart/form-data")]
+    public async Task<IActionResult> UpdateProfile([FromForm] UpdateProfileModel model)
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
@@ -100,5 +89,25 @@ public class AccountController : ControllerBase
             return Unauthorized();
 
         return Ok();
+    }
+    [Authorize]
+    [HttpGet("{id}")]
+    public async Task<ActionResult<UserForModerDTO>> GetUserById(string id)
+    {
+        var user = await _accountService.GetUserById(id);
+
+        if (user == null)
+            return NotFound();
+
+        return Ok(user);
+    }
+
+    [Authorize]
+    [HttpGet("all")]
+    public async Task<ActionResult<PaginatedResponse<UserDTO>>> GetAllUsers([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+    {
+        var users = await _accountService.GetAllUsers(page, pageSize);
+
+        return Ok(users);
     }
 }

@@ -7,10 +7,10 @@ using System.Threading.Tasks;
 
 namespace ASPNETCore.Application.DTO
 {
-    public class UserDTO
+    public class UserForModerDTO
     {
-        public UserDTO() { }
-        public UserDTO(User entity)
+        public UserForModerDTO() { }
+        public UserForModerDTO(User entity)
         {
             if (entity == null) return;
 
@@ -21,6 +21,9 @@ namespace ASPNETCore.Application.DTO
             ProfileImagePath = entity.ProfileImagePath;
             Fullname = entity.FullName;
             Email = entity.Email;
+            Bans = entity.Bans != null ? entity.Bans.Select(b => new BanDTO(b)).ToList() : new List<BanDTO>();
+            UserReports = entity.UserReports != null ? entity.UserReports.Select(r => new UserReportDTO(r)).ToList() : new List<UserReportDTO>();
+
         }
         public string Id { get; set; }
         public string? UserName { get; set; }
@@ -29,5 +32,8 @@ namespace ASPNETCore.Application.DTO
         public string? ProfileImagePath { get; set; }
         public VolunteerProfileDTO? VolunteerProfile { get; set; }
         public OrganizerProfileDTO? OrganizerProfile { get; set; }
+        public ICollection<BanDTO> Bans { get; set; }
+        public ICollection<UserReportDTO> UserReports { get; set; }
+
     }
 }

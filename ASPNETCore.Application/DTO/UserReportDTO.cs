@@ -19,6 +19,7 @@ namespace ASPNETCore.Application.DTO
             ReportedUserId = entity.ReportedUserId;
             ReportReason = entity.ReportReason;
             ReportStatusId = entity.ReportStatusId;
+            ModeratedByUserId = entity.ModeratedByUserId;
             IsDeleted = entity.IsDeleted;
             Sender = entity.Sender != null ? new UserDTO(entity.Sender) : null;
             Reported = entity.Reported != null ? new UserDTO(entity.Reported) : null;

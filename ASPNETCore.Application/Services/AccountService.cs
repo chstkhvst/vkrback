@@ -1,6 +1,8 @@
 ﻿using ASPNETCore.Application.DTO;
 using ASPNETCore.Application.Model;
 using ASPNETCore.Domain.Entities;
+using ASPNETCore.Domain.Interfaces;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -16,17 +18,20 @@ namespace ASPNETCore.Application.Services
         private readonly UserManager<User> _userManager;
         private readonly SignInManager<User> _signInManager;
         private readonly IConfiguration _configuration;
+        private readonly IWebHostEnvironment _env;
 
         public AccountService(
             UserManager<User> userManager,
             SignInManager<User> signInManager,
             IConfiguration configuration,
-            BanService banService)
+            BanService banService,
+            IWebHostEnvironment env)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _configuration = configuration;
             _banService = banService;
+            _env = env;
         }
 
         public async Task<IdentityResult> Register(RegisterModel model)
@@ -66,33 +71,6 @@ namespace ASPNETCore.Application.Services
 
             return result;
         }
-
-        //public async Task<AuthResponse?> Login(LoginModel model)
-        //{
-        //    var result = await _signInManager.PasswordSignInAsync(
-        //        model.UserName,
-        //        model.Password,
-        //        false,
-        //        false);
-
-        //    if (!result.Succeeded)
-        //        return null;
-
-        //    var user = await _userManager.Users
-        //        .Include(u => u.VolunteerProfile)
-        //        .Include(u => u.OrganizerProfile)
-        //        .FirstOrDefaultAsync(u => u.UserName == model.UserName);
-
-        //    var token = await GenerateJwtToken(user);
-        //    var roles = await _userManager.GetRolesAsync(user);
-
-        //    return new AuthResponse
-        //    {
-        //        Token = token,
-        //        User = new UserDTO(user),
-        //        Role = roles.FirstOrDefault()
-        //    };
-        //}
         public async Task<AuthResponse?> Login(LoginModel model)
         {
             var user = await _userManager.Users
@@ -142,10 +120,51 @@ namespace ASPNETCore.Application.Services
 
             return new UserDTO(user);
         }
+        public async Task<UserForModerDTO?> GetUserById(string id)
+        {
+            var user = await _userManager.Users
+                .Include(u => u.VolunteerProfile)
+                .Include(u => u.OrganizerProfile)
+                .Include(u => u.Bans)
+                .Include(u => u.UserReports)
+                .FirstOrDefaultAsync(u => u.Id == id && !u.IsDeleted);
 
+            if (user == null)
+                return null;
+
+            return new UserForModerDTO(user);
+        }
+        public async Task<PaginatedResponse<UserDTO>> GetAllUsers(int page = 1, int pageSize = 10)
+        {
+            var query = _userManager.Users
+                .Where(u => !u.IsDeleted)
+                .Include(u => u.VolunteerProfile)
+                .Include(u => u.OrganizerProfile)
+                .AsQueryable();
+
+            var totalCount = await query.CountAsync();
+
+            var users = await query
+                .OrderBy(u => u.UserName)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            var result = new PaginatedResponse<UserDTO>
+            {
+                Items = users.Select(u => new UserDTO(u)).ToList(),
+                TotalCount = totalCount,
+                PageSize = pageSize,
+                CurrentPage = page,
+                TotalPages = (int)Math.Ceiling(totalCount / (double)pageSize)
+            };
+
+            return result;
+        }
         public async Task<bool> UpdateProfile(ClaimsPrincipal principal, UpdateProfileModel model)
         {
             var user = await _userManager.Users
+                .Include(u => u.VolunteerProfile)
                 .Include(u => u.OrganizerProfile)
                 .FirstOrDefaultAsync(u => u.Id == _userManager.GetUserId(principal));
 
@@ -153,6 +172,7 @@ namespace ASPNETCore.Application.Services
                 return false;
 
             user.FullName = model.FullName ?? user.FullName;
+            user.UserName = model.UserName ?? user.UserName;
 
             if (user.OrganizerProfile != null)
             {
@@ -163,10 +183,27 @@ namespace ASPNETCore.Application.Services
                     model.Ogrn ?? user.OrganizerProfile.Ogrn;
             }
 
+            if (model.Image != null && model.Image.Length > 0)
+            {
+                var uploadsFolder = Path.Combine(_env.WebRootPath, "profilepics");
+
+                if (!Directory.Exists(uploadsFolder))
+                    Directory.CreateDirectory(uploadsFolder);
+
+                var uniqueFileName = $"{Guid.NewGuid()}{Path.GetExtension(model.Image.FileName)}";
+                var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await model.Image.CopyToAsync(stream);
+                }
+
+                user.ProfileImagePath = $"/profilepics/{uniqueFileName}";
+            }
+
             var result = await _userManager.UpdateAsync(user);
             return result.Succeeded;
         }
-
         private async Task<string> GenerateJwtToken(User user)
         {
             var claims = new List<Claim>

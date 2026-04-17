@@ -17,6 +17,7 @@ namespace ASPNETCore.Application.DTO
             Id = entity.Id;
             BannedUserId = entity.BannedUserId;
             ModerId = entity.ModerId;
+            BanReason = entity.BanReason;
             IsActive = entity.IsActive;
             IsDeleted = entity.IsDeleted;
             Moder = entity.Moder != null ? new UserDTO(entity.Moder) : null;
