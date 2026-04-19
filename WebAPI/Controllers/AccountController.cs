@@ -104,9 +104,9 @@ public class AccountController : ControllerBase
 
     [Authorize]
     [HttpGet("all")]
-    public async Task<ActionResult<PaginatedResponse<UserDTO>>> GetAllUsers([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+    public async Task<ActionResult<PaginatedResponse<UserDTO>>> GetAllUsers([FromQuery] int page = 1, [FromQuery] int pageSize = 10, [FromQuery] string? search = null)
     {
-        var users = await _accountService.GetAllUsers(page, pageSize);
+        var users = await _accountService.GetAllUsers(page, pageSize, search);
 
         return Ok(users);
     }

@@ -28,9 +28,9 @@ namespace ASPNETCore.Application.Services
             return entity == null ? null : new BanDTO(entity);
         }
 
-        public async Task<IEnumerable<BanDTO>> GetAllAsync()
+        public async Task<IEnumerable<BanDTO>> GetAllAsync(string? search)
         {
-            var bans = await _banRepository.GetAllAsync();
+            var bans = await _banRepository.GetAllAsync(search);
             return bans.Select(b => new BanDTO(b));
         }
 
@@ -79,6 +79,7 @@ namespace ASPNETCore.Application.Services
             var entity = new Ban
             {
                 Id = dto.Id,
+                BanReason = dto.BanReason,
                 BannedUserId = dto.BannedUserId,
                 ModerId = dto.ModerId,
                 IsActive = dto.IsActive,

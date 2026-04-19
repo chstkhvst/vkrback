@@ -10,7 +10,6 @@ namespace ASPNETCore.Domain.Entities
 {
     public class VolunteerRank
     {
-        //checked
         [Key] public int Id { get; set; }
         [Required] public string RankName { get; set; }
         public int PointsRequired { get; set; } //?

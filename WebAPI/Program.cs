@@ -26,6 +26,7 @@ builder.Services.AddScoped<IBanRepository, BanRepository>();
 builder.Services.AddScoped<IEventRepository, EventRepository>();
 builder.Services.AddScoped<IReportRepository, ReportRepository>();
 builder.Services.AddScoped<ICatalogRepository, CatalogRepository>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<CatalogService>();
 builder.Services.AddScoped<AccountService>();
 builder.Services.AddScoped<AttendanceService>();

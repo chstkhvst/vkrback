@@ -11,7 +11,7 @@ namespace ASPNETCore.Domain.Interfaces
     {
         Task<bool> IsUserBannedAsync(string userId);
         Task<Ban?> GetByIdAsync(int id);
-        Task<IEnumerable<Ban>> GetAllAsync();
+        Task<IEnumerable<Ban>> GetAllAsync(string? search);
         Task<IEnumerable<Ban>> GetByUserIdAsync(string userId);
         Task<IEnumerable<Ban>> GetByModerIdAsync(string moderId);
         Task<Ban> AddAsync(Ban ban);

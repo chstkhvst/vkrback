@@ -2,6 +2,7 @@
 using ASPNETCore.Application.Model;
 using ASPNETCore.Domain.Entities;
 using ASPNETCore.Domain.Interfaces;
+using ASPNETCore.Infrastructure.Repositories;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -17,12 +18,14 @@ namespace ASPNETCore.Application.Services
         private readonly BanService _banService;
         private readonly UserManager<User> _userManager;
         private readonly SignInManager<User> _signInManager;
+        private readonly IUserRepository _userRepository; 
         private readonly IConfiguration _configuration;
         private readonly IWebHostEnvironment _env;
 
         public AccountService(
             UserManager<User> userManager,
             SignInManager<User> signInManager,
+            IUserRepository userRepository,
             IConfiguration configuration,
             BanService banService,
             IWebHostEnvironment env)
@@ -32,6 +35,7 @@ namespace ASPNETCore.Application.Services
             _configuration = configuration;
             _banService = banService;
             _env = env;
+            _userRepository = userRepository;
         }
 
         public async Task<IdentityResult> Register(RegisterModel model)
@@ -73,10 +77,7 @@ namespace ASPNETCore.Application.Services
         }
         public async Task<AuthResponse?> Login(LoginModel model)
         {
-            var user = await _userManager.Users
-                .Include(u => u.VolunteerProfile)
-                .Include(u => u.OrganizerProfile)
-                .FirstOrDefaultAsync(u => u.UserName == model.UserName);
+            var user = await _userRepository.GetByUserNameWithProfilesAsync(model.UserName);
 
             if (user == null)
                 return null;
@@ -110,10 +111,8 @@ namespace ASPNETCore.Application.Services
 
         public async Task<UserDTO?> GetCurrentUser(ClaimsPrincipal principal)
         {
-            var user = await _userManager.Users
-                .Include(u => u.VolunteerProfile)
-                .Include(u => u.OrganizerProfile)
-                .FirstOrDefaultAsync(u => u.Id == _userManager.GetUserId(principal));
+            var userId = _userManager.GetUserId(principal);
+            var user = await _userRepository.GetByIdWithProfilesAsync(userId);
 
             if (user == null)
                 return null;
@@ -122,35 +121,18 @@ namespace ASPNETCore.Application.Services
         }
         public async Task<UserForModerDTO?> GetUserById(string id)
         {
-            var user = await _userManager.Users
-                .Include(u => u.VolunteerProfile)
-                .Include(u => u.OrganizerProfile)
-                .Include(u => u.Bans)
-                .Include(u => u.UserReports)
-                .FirstOrDefaultAsync(u => u.Id == id && !u.IsDeleted);
+            var user = await _userRepository.GetByIdWithFullDetailsAsync(id);
 
             if (user == null)
                 return null;
 
             return new UserForModerDTO(user);
         }
-        public async Task<PaginatedResponse<UserDTO>> GetAllUsers(int page = 1, int pageSize = 10)
+        public async Task<PaginatedResponse<UserDTO>> GetAllUsers(int page = 1, int pageSize = 10, string? search = null)
         {
-            var query = _userManager.Users
-                .Where(u => !u.IsDeleted)
-                .Include(u => u.VolunteerProfile)
-                .Include(u => u.OrganizerProfile)
-                .AsQueryable();
+            var (users, totalCount) = await _userRepository.GetPagedAsync(page, pageSize, search);
 
-            var totalCount = await query.CountAsync();
-
-            var users = await query
-                .OrderBy(u => u.UserName)
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .ToListAsync();
-
-            var result = new PaginatedResponse<UserDTO>
+            return new PaginatedResponse<UserDTO>
             {
                 Items = users.Select(u => new UserDTO(u)).ToList(),
                 TotalCount = totalCount,
@@ -158,15 +140,11 @@ namespace ASPNETCore.Application.Services
                 CurrentPage = page,
                 TotalPages = (int)Math.Ceiling(totalCount / (double)pageSize)
             };
-
-            return result;
         }
         public async Task<bool> UpdateProfile(ClaimsPrincipal principal, UpdateProfileModel model)
         {
-            var user = await _userManager.Users
-                .Include(u => u.VolunteerProfile)
-                .Include(u => u.OrganizerProfile)
-                .FirstOrDefaultAsync(u => u.Id == _userManager.GetUserId(principal));
+            var userId = _userManager.GetUserId(principal);
+            var user = await _userRepository.GetByIdWithProfilesAsync(userId);
 
             if (user == null)
                 return false;

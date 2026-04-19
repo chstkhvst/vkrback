@@ -33,7 +33,7 @@ namespace WebAPI.Controllers
             }
         }
         [HttpGet("[action]")]
-        public async Task<ActionResult<IEnumerable<BanDTO>>> GetBans()
+        public async Task<ActionResult<IEnumerable<BanDTO>>> GetBans([FromQuery] string? search)
         {
             var currUser = User.Identity?.IsAuthenticated == true
                 ? User.Identity.Name
@@ -41,7 +41,7 @@ namespace WebAPI.Controllers
 
             _logger.LogInformation($"{currUser} получает список банов");
 
-            var bans = await _banService.GetAllAsync();
+            var bans = await _banService.GetAllAsync(search);
             return Ok(bans);
         }
         [HttpGet("[action]/{id}")]

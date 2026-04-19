@@ -19,12 +19,25 @@ namespace ASPNETCore.Infrastructure.Repositories
                                b.IsActive &&
                                !b.IsDeleted);
         }
-        public async Task<IEnumerable<Ban>> GetAllAsync()
+        public async Task<IEnumerable<Ban>> GetAllAsync(string? search)
         {
-            return await _context.Bans
+            var query = _context.Bans
                 .Include(b => b.Moder)
                 .Include(b => b.BannedUser)
-                .Where(b => !b.IsDeleted)
+                .Where(b => !b.IsDeleted);
+
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                var lower = search.ToLower();
+
+                query = query.Where(b =>
+                    (b.BanReason != null && b.BanReason.ToLower().Contains(lower)) ||
+                    (b.Moder != null && b.Moder.UserName.ToLower().Contains(lower)) ||
+                    (b.BannedUser != null && b.BannedUser.UserName.ToLower().Contains(lower))
+                );
+            }
+
+            return await query
                 .OrderByDescending(b => b.Id)
                 .AsNoTracking()
                 .ToListAsync();

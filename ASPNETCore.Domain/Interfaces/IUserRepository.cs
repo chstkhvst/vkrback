@@ -9,7 +9,14 @@ namespace ASPNETCore.Domain.Interfaces
 {
     public interface IUserRepository
     {
-        Task<User?> GetByIdWithDetailsAsync(string id);
+        Task<User?> GetByUserNameWithProfilesAsync(string userName);
+
+        Task<User?> GetByIdWithProfilesAsync(string id);
+
+        Task<User?> GetByIdWithFullDetailsAsync(string id);
+
         Task<(List<User> Users, int TotalCount)> GetPagedAsync(int page, int pageSize, string? search);
+
+        Task UpdateAsync(User user);
     }
 }
