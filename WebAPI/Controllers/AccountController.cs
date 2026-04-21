@@ -110,4 +110,12 @@ public class AccountController : ControllerBase
 
         return Ok(users);
     }
+    [Authorize]
+    [HttpGet("rating")]
+    public async Task<ActionResult<PaginatedResponse<UserDTO>>> GetForRating()
+    {
+        var users = await _accountService.GetForRating();
+
+        return Ok(users);
+    }
 }

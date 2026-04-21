@@ -141,6 +141,12 @@ namespace ASPNETCore.Application.Services
                 TotalPages = (int)Math.Ceiling(totalCount / (double)pageSize)
             };
         }
+        public async Task<List<UserDTO>> GetForRating()
+        {
+            var users = await _userRepository.GetForRatingAsync();
+
+            return users.Select(u => new UserDTO(u)).ToList();
+        }
         public async Task<bool> UpdateProfile(ClaimsPrincipal principal, UpdateProfileModel model)
         {
             var userId = _userManager.GetUserId(principal);
@@ -150,7 +156,11 @@ namespace ASPNETCore.Application.Services
                 return false;
 
             user.FullName = model.FullName ?? user.FullName;
-            user.UserName = model.UserName ?? user.UserName;
+            if (model.UserName !=  null /*&& (user.VolunteerProfile?.Coins >= 20 || user.VolunteerProfile == null)*/)
+            {
+                user.UserName = model.UserName ?? user.UserName;
+                //user.VolunteerProfile.Coins -= 20;
+            }     
 
             if (user.OrganizerProfile != null)
             {
@@ -161,7 +171,7 @@ namespace ASPNETCore.Application.Services
                     model.Ogrn ?? user.OrganizerProfile.Ogrn;
             }
 
-            if (model.Image != null && model.Image.Length > 0)
+            if (model.Image != null && model.Image.Length > 0 /*&& (user.VolunteerProfile?.Coins >= 40 || user.VolunteerProfile == null)*/)
             {
                 var uploadsFolder = Path.Combine(_env.WebRootPath, "profilepics");
 
@@ -177,6 +187,25 @@ namespace ASPNETCore.Application.Services
                 }
 
                 user.ProfileImagePath = $"/profilepics/{uniqueFileName}";
+                //user.VolunteerProfile.Coins -= 40;
+            }
+            if (model.BackgroundImage != null && model.BackgroundImage.Length > 0 /*&& user.VolunteerProfile?.Coins >= 100 || user.OrganizerProfile != null*/)
+            {
+                var uploadsFolder = Path.Combine(_env.WebRootPath, "backgroundpics");
+
+                if (!Directory.Exists(uploadsFolder))
+                    Directory.CreateDirectory(uploadsFolder);
+
+                var uniqueFileName = $"{Guid.NewGuid()}{Path.GetExtension(model.BackgroundImage.FileName)}";
+                var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await model.BackgroundImage.CopyToAsync(stream);
+                }
+
+                user.BackgroundImagePath = $"/backgroundpics/{uniqueFileName}";
+                //user.VolunteerProfile.Coins -= 100;
             }
 
             var result = await _userManager.UpdateAsync(user);

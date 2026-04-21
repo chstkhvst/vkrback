@@ -16,6 +16,7 @@ namespace ASPNETCore.Domain.Interfaces
         Task<User?> GetByIdWithFullDetailsAsync(string id);
 
         Task<(List<User> Users, int TotalCount)> GetPagedAsync(int page, int pageSize, string? search);
+        Task<List<User>> GetForRatingAsync();
 
         Task UpdateAsync(User user);
     }

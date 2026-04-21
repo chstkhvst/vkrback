@@ -135,7 +135,7 @@ namespace ASPNETCore.Infrastructure.Data
             // UserReport - Reported
             modelBuilder.Entity<UserReport>()
                 .HasOne(r => r.Reported)
-                .WithMany()
+                .WithMany(u => u.UserReports)
                 .HasForeignKey(r => r.ReportedUserId)
                 .OnDelete(DeleteBehavior.Restrict);
 

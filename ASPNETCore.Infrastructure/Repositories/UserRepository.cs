@@ -75,7 +75,16 @@ namespace ASPNETCore.Infrastructure.Repositories
 
             return (users, totalCount);
         }
-
+        public async Task<List<User>> GetForRatingAsync()
+        {
+            return await _userManager.Users
+                .Where(u => !u.IsDeleted && u.VolunteerProfile != null)
+                .Include(u => u.VolunteerProfile)
+                    .ThenInclude(vp => vp.Rank)
+                .OrderByDescending(u=>u.VolunteerProfile.Points)
+                .Take(100)
+                .ToListAsync();
+        }
         public async Task UpdateAsync(User user)
         {
             await _userManager.UpdateAsync(user);

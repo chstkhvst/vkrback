@@ -19,6 +19,7 @@ namespace ASPNETCore.Application.DTO
             VolunteerProfile = entity.VolunteerProfile != null ? new VolunteerProfileDTO(entity.VolunteerProfile) : null;
             OrganizerProfile = entity.OrganizerProfile != null ? new OrganizerProfileDTO(entity.OrganizerProfile) : null;
             ProfileImagePath = entity.ProfileImagePath;
+            BackgroundImagePath = entity.BackgroundImagePath;
             Fullname = entity.FullName;
             Email = entity.Email;
         }
@@ -27,6 +28,7 @@ namespace ASPNETCore.Application.DTO
         public string? Fullname { get; set; }
         public string Email { get; set; }
         public string? ProfileImagePath { get; set; }
+        public string? BackgroundImagePath { get; set; }
         public VolunteerProfileDTO? VolunteerProfile { get; set; }
         public OrganizerProfileDTO? OrganizerProfile { get; set; }
     }

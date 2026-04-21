@@ -4,6 +4,7 @@ using ASPNETCore.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ASPNETCore.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260419173329_BanCreatedAt")]
+    partial class BanCreatedAt
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -222,9 +225,6 @@ namespace ASPNETCore.Infrastructure.Migrations
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("int");
 
-                    b.Property<string>("BackgroundImagePath")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
@@ -320,6 +320,9 @@ namespace ASPNETCore.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
                     b.HasKey("Id");
 
                     b.HasIndex("ModeratedByUserId");
@@ -329,6 +332,8 @@ namespace ASPNETCore.Infrastructure.Migrations
                     b.HasIndex("ReportedUserId");
 
                     b.HasIndex("SenderUserId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("UserReports");
                 });
@@ -408,9 +413,6 @@ namespace ASPNETCore.Infrastructure.Migrations
                 {
                     b.Property<string>("UserId")
                         .HasColumnType("nvarchar(450)");
-
-                    b.Property<int>("Coins")
-                        .HasColumnType("int");
 
                     b.Property<int>("Points")
                         .HasColumnType("int");
@@ -657,7 +659,7 @@ namespace ASPNETCore.Infrastructure.Migrations
                         .IsRequired();
 
                     b.HasOne("ASPNETCore.Domain.Entities.User", "Reported")
-                        .WithMany("UserReports")
+                        .WithMany()
                         .HasForeignKey("ReportedUserId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
@@ -667,6 +669,10 @@ namespace ASPNETCore.Infrastructure.Migrations
                         .HasForeignKey("SenderUserId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.HasOne("ASPNETCore.Domain.Entities.User", null)
+                        .WithMany("UserReports")
+                        .HasForeignKey("UserId");
 
                     b.Navigation("Moder");
 

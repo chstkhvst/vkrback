@@ -51,7 +51,7 @@ namespace ASPNETCore.Infrastructure.Repositories
                 .Include(b => b.BannedUser)
                     .ThenInclude(u => u.OrganizerProfile)
                 .Where(b => b.BannedUserId == userId && !b.IsDeleted)
-                .OrderByDescending(b => b.Id)
+                .OrderByDescending(b => b.CreatedAt)
                 .AsNoTracking()
                 .ToListAsync();
         }

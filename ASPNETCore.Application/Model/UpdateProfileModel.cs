@@ -10,5 +10,6 @@ namespace ASPNETCore.Application.Model
         public string? OrganizationName { get; set; }
         public string? Ogrn { get; set; }
         public IFormFile? Image { get; set; }
+        public IFormFile? BackgroundImage { get; set; }
     }
 }

@@ -7,6 +7,7 @@ namespace ASPNETCore.Domain.Entities
     {
         public string? FullName { get; set; }
         public string? ProfileImagePath { get; set; }
+        public string? BackgroundImagePath { get; set; }
         public virtual VolunteerProfile? VolunteerProfile { get; set; }
         public virtual OrganizerProfile? OrganizerProfile { get; set; }
         public bool IsDeleted { get; set; }

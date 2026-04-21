@@ -59,6 +59,7 @@ namespace ASPNETCore.Application.Services
                     BannedUserId = dto.BannedUserId,
                     ModerId = dto.ModerId,
                     BanReason = dto.BanReason,
+                    CreatedAt = DateOnly.FromDateTime(DateTime.Today),
                     IsActive = dto.IsActive,
                     IsDeleted = dto.IsDeleted
                 };
@@ -80,6 +81,7 @@ namespace ASPNETCore.Application.Services
             {
                 Id = dto.Id,
                 BanReason = dto.BanReason,
+                CreatedAt = dto.CreatedAt,
                 BannedUserId = dto.BannedUserId,
                 ModerId = dto.ModerId,
                 IsActive = dto.IsActive,
