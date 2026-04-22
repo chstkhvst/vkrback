@@ -16,12 +16,11 @@ namespace ASPNETCore.Application.DTO
 
             UserId = entity.UserId;
             TotalPoints = entity.Points;
-            Coins = entity.Coins;
             Rank = entity.Rank != null ? new VolunteerRankDTO(entity.Rank) : null;
         }
         public string UserId { get; set; }
         public int TotalPoints { get; set; }
-        public int Coins { get; set; }
+        public int? MonthlyPoints { get; set; }
         public VolunteerRankDTO? Rank { get; set; }
     }
 }

@@ -141,9 +141,24 @@ namespace ASPNETCore.Application.Services
                 TotalPages = (int)Math.Ceiling(totalCount / (double)pageSize)
             };
         }
-        public async Task<List<UserDTO>> GetForRating()
+        public async Task<List<UserDTO>> GetForRatingMonthly()
         {
-            var users = await _userRepository.GetForRatingAsync();
+            var data = await _userRepository.GetForRatingMonthlyAsync();
+
+            return data.Select(x =>
+            {
+                var dto = new UserDTO(x.User);
+
+                if (dto.VolunteerProfile != null)
+                {
+                    dto.VolunteerProfile.MonthlyPoints = x.MonthlyPoints;
+                }
+                return dto;
+            }).ToList();
+        }
+        public async Task<List<UserDTO>> GetForRatingAll()
+        {
+            var users = await _userRepository.GetForRatingAllAsync();
 
             return users.Select(u => new UserDTO(u)).ToList();
         }
@@ -156,10 +171,9 @@ namespace ASPNETCore.Application.Services
                 return false;
 
             user.FullName = model.FullName ?? user.FullName;
-            if (model.UserName !=  null /*&& (user.VolunteerProfile?.Coins >= 20 || user.VolunteerProfile == null)*/)
+            if (model.UserName !=  null)
             {
                 user.UserName = model.UserName ?? user.UserName;
-                //user.VolunteerProfile.Coins -= 20;
             }     
 
             if (user.OrganizerProfile != null)
@@ -171,7 +185,7 @@ namespace ASPNETCore.Application.Services
                     model.Ogrn ?? user.OrganizerProfile.Ogrn;
             }
 
-            if (model.Image != null && model.Image.Length > 0 /*&& (user.VolunteerProfile?.Coins >= 40 || user.VolunteerProfile == null)*/)
+            if (model.Image != null && model.Image.Length > 0)
             {
                 var uploadsFolder = Path.Combine(_env.WebRootPath, "profilepics");
 
@@ -187,9 +201,8 @@ namespace ASPNETCore.Application.Services
                 }
 
                 user.ProfileImagePath = $"/profilepics/{uniqueFileName}";
-                //user.VolunteerProfile.Coins -= 40;
             }
-            if (model.BackgroundImage != null && model.BackgroundImage.Length > 0 /*&& user.VolunteerProfile?.Coins >= 100 || user.OrganizerProfile != null*/)
+            if (model.BackgroundImage != null && model.BackgroundImage.Length > 0)
             {
                 var uploadsFolder = Path.Combine(_env.WebRootPath, "backgroundpics");
 
@@ -205,7 +218,6 @@ namespace ASPNETCore.Application.Services
                 }
 
                 user.BackgroundImagePath = $"/backgroundpics/{uniqueFileName}";
-                //user.VolunteerProfile.Coins -= 100;
             }
 
             var result = await _userManager.UpdateAsync(user);

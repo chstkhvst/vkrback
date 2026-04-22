@@ -16,8 +16,8 @@ namespace ASPNETCore.Domain.Interfaces
         Task<User?> GetByIdWithFullDetailsAsync(string id);
 
         Task<(List<User> Users, int TotalCount)> GetPagedAsync(int page, int pageSize, string? search);
-        Task<List<User>> GetForRatingAsync();
-
+        Task<List<(User User, int MonthlyPoints)>> GetForRatingMonthlyAsync(int months = 1);
+        Task<List<User>> GetForRatingAllAsync();
         Task UpdateAsync(User user);
     }
 }

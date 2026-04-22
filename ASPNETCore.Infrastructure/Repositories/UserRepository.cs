@@ -5,6 +5,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ASPNETCore.Infrastructure.Repositories
 {
+    public class UserWithMonthlyPoints
+    {
+        public User User { get; set; }
+        public int MonthlyPoints { get; set; }
+    }
     public class UserRepository : IUserRepository
     {
         private readonly UserManager<User> _userManager;
@@ -39,7 +44,7 @@ namespace ASPNETCore.Infrastructure.Repositories
             return await _userManager.Users
                 .Include(u => u.VolunteerProfile)
                 .Include(u => u.OrganizerProfile)
-                .Include(u => u.Bans)
+                .Include(u => u.Bans.OrderByDescending(b => b.CreatedAt))
                 .Include(u => u.UserReports)
                 .FirstOrDefaultAsync(u => u.Id == id && !u.IsDeleted);
         }
@@ -75,15 +80,49 @@ namespace ASPNETCore.Infrastructure.Repositories
 
             return (users, totalCount);
         }
-        public async Task<List<User>> GetForRatingAsync()
+        public async Task<List<User>> GetForRatingAllAsync()
         {
             return await _userManager.Users
                 .Where(u => !u.IsDeleted && u.VolunteerProfile != null)
                 .Include(u => u.VolunteerProfile)
                     .ThenInclude(vp => vp.Rank)
-                .OrderByDescending(u=>u.VolunteerProfile.Points)
-                .Take(100)
+                .OrderByDescending(u => u.VolunteerProfile.Points)
+                .Take(50)
                 .ToListAsync();
+        }
+        public async Task<List<(User User, int MonthlyPoints)>> GetForRatingMonthlyAsync(int months = 1)
+        {
+            var startDate = DateTime.UtcNow.AddMonths(-months);
+
+            var userPoints = await _userManager.Users
+                .Where(u => !u.IsDeleted && u.VolunteerProfile != null)
+                .Select(u => new
+                {
+                    UserId = u.Id,
+                    MonthlyPoints = u.EventAttendance
+                        .Where(a => a.AttendanceStatusId == 3 &&
+                                    a.VolunteerEvent.EventDateTime >= startDate)
+                        .Sum(a => a.VolunteerEvent.EventPoints)
+                })
+                .Where(x => x.MonthlyPoints > 0)
+                .OrderByDescending(x => x.MonthlyPoints)
+                .Take(20)
+                .ToListAsync();
+
+            var userIds = userPoints.Select(x => x.UserId).ToList();
+
+            var users = await _userManager.Users
+                .Where(u => userIds.Contains(u.Id))
+                .Include(u => u.VolunteerProfile)
+                    .ThenInclude(vp => vp.Rank)
+                .ToListAsync();
+
+            var result = userPoints
+                .Join(users, up => up.UserId, u => u.Id, (up, u) => (User: u, MonthlyPoints: up.MonthlyPoints))
+                .OrderByDescending(x => x.MonthlyPoints)
+                .ToList();
+
+            return result;
         }
         public async Task UpdateAsync(User user)
         {

@@ -111,10 +111,18 @@ public class AccountController : ControllerBase
         return Ok(users);
     }
     [Authorize]
-    [HttpGet("rating")]
-    public async Task<ActionResult<PaginatedResponse<UserDTO>>> GetForRating()
+    [HttpGet("ratingmonthly")]
+    public async Task<ActionResult<IEnumerable<UserDTO>>> GetForRatingMonthly()
     {
-        var users = await _accountService.GetForRating();
+        var users = await _accountService.GetForRatingMonthly();
+
+        return Ok(users);
+    }
+    [Authorize]
+    [HttpGet("rating")]
+    public async Task<ActionResult<IEnumerable<UserDTO>>> GetForRatingAll()
+    {
+        var users = await _accountService.GetForRatingAll();
 
         return Ok(users);
     }
