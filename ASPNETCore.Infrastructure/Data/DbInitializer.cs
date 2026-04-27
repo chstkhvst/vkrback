@@ -65,6 +65,14 @@ namespace ASPNETCore.Infrastructure.Data
                 );
             }
 
+            if (!context.NotificationTypes.Any())
+            {
+                context.NotificationTypes.AddRange(
+                    new NotificationType { NotificationTypeName = "Отмена" },
+                    new NotificationType { NotificationTypeName = "Изменение" }
+                );
+            }
+
             // VolunteerRanks
             if (!context.VolunteerRanks.Any())
             {

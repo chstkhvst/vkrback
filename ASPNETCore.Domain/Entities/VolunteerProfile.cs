@@ -16,7 +16,7 @@ namespace ASPNETCore.Domain.Entities
         public virtual User User { get; set; }
         public int RankId { get; set; }
         public int Points { get; set; }
-        public int Coins  { get; set; }
+        //public int Coins  { get; set; }
         public virtual VolunteerRank Rank { get; set; }
     }
 }

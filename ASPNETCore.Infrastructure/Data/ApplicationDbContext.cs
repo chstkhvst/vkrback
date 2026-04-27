@@ -11,6 +11,7 @@ namespace ASPNETCore.Infrastructure.Data
         public DbSet<EventCategory> EventCategories { get; set; }
         public DbSet<EventStatus> EventStatuses { get; set; }
         public DbSet<AttendanceStatus> AttendanceStatuses { get; set; }
+        public DbSet<NotificationType> NotificationTypes { get; set; }
 
         public DbSet<City> Cities { get; set; }
 
@@ -22,6 +23,8 @@ namespace ASPNETCore.Infrastructure.Data
         public DbSet<ReportStatus> ReportStatuses { get; set; }
 
         public DbSet<Ban> Bans { get; set; }
+
+        public DbSet<Notification> Notifications { get; set; }
 
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) { }
 
@@ -151,6 +154,27 @@ namespace ASPNETCore.Infrastructure.Data
                 .HasOne(r => r.ReportStatus)
                 .WithMany(s => s.UserReports)
                 .HasForeignKey(r => r.ReportStatusId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            //Notification - User Recipient
+            modelBuilder.Entity<Notification>()
+                .HasOne(n => n.Recipient)
+                .WithMany(u => u.Notifications)
+                .HasForeignKey(n => n.RecipientId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Notification - Event
+            modelBuilder.Entity<Notification>()
+                .HasOne(n => n.VolunteerEvent)
+                .WithMany(e => e.Notifications)
+                .HasForeignKey(n => n.EventId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            // Notification - Type
+            modelBuilder.Entity<Notification>()
+                .HasOne(n => n.NotificationType)
+                .WithMany()
+                .HasForeignKey(n => n.TypeId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             //soft delete фильтры

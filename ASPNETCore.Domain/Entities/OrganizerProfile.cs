@@ -11,5 +11,7 @@ namespace ASPNETCore.Domain.Entities
         public virtual User User { get; set; }
         public string OrganizationName { get; set; }
         public string Ogrn { get; set; }
+        public bool IsApproved { get; set; }
+        public string? ModeratedByUserId { get; set; }
     }
 }

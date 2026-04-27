@@ -4,6 +4,7 @@ using ASPNETCore.Application.Services;
 using ASPNETCore.Domain.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 [ApiController]
 [Route("api/[controller]")]
@@ -27,13 +28,13 @@ public class AccountController : ControllerBase
         if (!result.Succeeded)
             return BadRequest(result.Errors);
 
-        var loginResponse = await _accountService.Login(new LoginModel
-        {
-            UserName = model.UserName,
-            Password = model.Password
-        });
+        //var loginResponse = await _accountService.Login(new LoginModel
+        //{
+        //    UserName = model.UserName,
+        //    Password = model.Password
+        //});
 
-        return Ok(loginResponse);
+        return Ok(/*loginResponse*/);
     }
     [HttpPost("login")]
     public async Task<ActionResult<AuthResponse>> Login(LoginModel model)
@@ -53,6 +54,10 @@ public class AccountController : ControllerBase
         catch (Exception ex) when (ex.Message == "User is banned")
         {
             return Unauthorized("User is banned");
+        }
+        catch (Exception ex) when (ex.Message == "Organizer profile is not approved yet")
+        {
+            return Unauthorized("Organizer profile is not approved yet");
         }
     }
 
@@ -123,6 +128,30 @@ public class AccountController : ControllerBase
     public async Task<ActionResult<IEnumerable<UserDTO>>> GetForRatingAll()
     {
         var users = await _accountService.GetForRatingAll();
+
+        return Ok(users);
+    }
+    [Authorize(Roles = "moderator")]
+    [HttpPost("approve-organizer/{userId}")]
+    public async Task<IActionResult> ApproveOrganizerProfile(string userId)
+    {
+        var moderatorId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        if (string.IsNullOrEmpty(moderatorId))
+            return Unauthorized();
+
+        var success = await _accountService.ApproveOrganizerProfile(userId, moderatorId);
+
+        if (!success)
+            return NotFound();
+
+        return Ok();
+    }
+    [Authorize(Roles = "moderator")]
+    [HttpGet("organizers/pending")]
+    public async Task<ActionResult<List<UserForModerDTO>>> GetPendingOrganizers()
+    {
+        var users = await _accountService.GetUnapprovedOrganizerProfiles();
 
         return Ok(users);
     }

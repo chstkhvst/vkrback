@@ -29,5 +29,8 @@ namespace ASPNETCore.Domain.Entities
 
         [JsonIgnore]
         public virtual ICollection<EventAttendance> Attendees { get; set; }
+
+        [JsonIgnore]
+        public ICollection<Notification> Notifications { get; set; }
     }
 }

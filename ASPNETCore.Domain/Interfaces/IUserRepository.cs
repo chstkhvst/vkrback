@@ -19,5 +19,6 @@ namespace ASPNETCore.Domain.Interfaces
         Task<List<(User User, int MonthlyPoints)>> GetForRatingMonthlyAsync(int months = 1);
         Task<List<User>> GetForRatingAllAsync();
         Task UpdateAsync(User user);
+        Task<List<User>> GetUnapprovedOrganizersAsync();
     }
 }

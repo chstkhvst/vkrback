@@ -27,5 +27,8 @@ namespace ASPNETCore.Domain.Entities
         // жалобы
         [JsonIgnore]
         public ICollection<UserReport> UserReports { get; set; }
+
+        [JsonIgnore]
+        public ICollection<Notification> Notifications { get; set; }
     }
 }

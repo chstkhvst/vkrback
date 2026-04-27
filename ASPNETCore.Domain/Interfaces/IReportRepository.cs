@@ -26,10 +26,5 @@ namespace ASPNETCore.Domain.Interfaces
         Task SoftDeleteAsync(int id);
         Task<IEnumerable<UserReport>> GetByStatusIdAsync(int statusId);
         Task<IEnumerable<UserReport>> GetBySenderAndReportedAsync(string senderId, string reportedId);
-
-        //можно добавить функционал типа если модер банит 1 чела то статус всех остальных 
-        //жалоб на того же чела меняется на рассмотрена
-
-        // жалобы в группе?
     }
 }

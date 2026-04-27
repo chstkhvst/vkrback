@@ -17,5 +17,7 @@ namespace ASPNETCore.Domain.Interfaces
         Task<VolunteerRank?> GetRankForPointsAsync(int points);
         Task<IEnumerable<City>> GetCitiesAsync();
         Task<City?> GetCityByIdAsync(int id);
+        Task<IEnumerable<NotificationType>> GetNotificationTypesAsync();
+        Task<NotificationType?> GetNotificationTypeByIdAsync(int id);
     }
 }

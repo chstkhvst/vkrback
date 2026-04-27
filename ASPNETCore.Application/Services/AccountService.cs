@@ -11,6 +11,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+
 namespace ASPNETCore.Application.Services
 {
     public class AccountService
@@ -67,7 +68,8 @@ namespace ASPNETCore.Application.Services
                 {
                     UserId = user.Id,
                     OrganizationName = model.OrganizationName,
-                    Ogrn = model.Ogrn
+                    Ogrn = model.Ogrn,
+                    IsApproved = false
                 };
             }
 
@@ -84,6 +86,8 @@ namespace ASPNETCore.Application.Services
             var isBanned = await _banService.IsUserBannedAsync(user.Id);
             if (isBanned)
                 throw new Exception("User is banned");
+            if (user.OrganizerProfile != null && !user.OrganizerProfile.IsApproved)
+                throw new Exception("Organizer profile is not approved yet");
             var result = await _signInManager.PasswordSignInAsync(
                 model.UserName,
                 model.Password,
@@ -222,6 +226,26 @@ namespace ASPNETCore.Application.Services
 
             var result = await _userManager.UpdateAsync(user);
             return result.Succeeded;
+        }
+        public async Task<bool> ApproveOrganizerProfile(string userId, string moderatorId)
+        {
+            var user = await _userRepository.GetByIdWithProfilesAsync(userId);
+
+            if (user == null || user.OrganizerProfile == null)
+                return false;
+
+            user.OrganizerProfile.IsApproved = true;
+            user.OrganizerProfile.ModeratedByUserId = moderatorId;
+
+            await _userRepository.UpdateAsync(user);
+
+            return true;
+        }
+        public async Task<List<UserForModerDTO>> GetUnapprovedOrganizerProfiles()
+        {
+            var users = await _userRepository.GetUnapprovedOrganizersAsync();
+
+            return users.Select(u => new UserForModerDTO(u)).ToList();
         }
         private async Task<string> GenerateJwtToken(User user)
         {

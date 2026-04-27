@@ -27,12 +27,14 @@ builder.Services.AddScoped<IEventRepository, EventRepository>();
 builder.Services.AddScoped<IReportRepository, ReportRepository>();
 builder.Services.AddScoped<ICatalogRepository, CatalogRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 builder.Services.AddScoped<CatalogService>();
 builder.Services.AddScoped<AccountService>();
 builder.Services.AddScoped<AttendanceService>();
 builder.Services.AddScoped<BanService>();
 builder.Services.AddScoped<EventService>();
 builder.Services.AddScoped<ReportService>();
+builder.Services.AddScoped<NotificationService>();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>

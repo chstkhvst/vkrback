@@ -118,7 +118,6 @@ namespace ASPNETCore.Application.Services
                 if (profile == null)
                     throw new Exception("User profile not found");
                 profile.Points += eventPoints;
-                profile.Coins += eventPoints;
 
                 //обновляем ранг
                 var newRank = await _catalogRepository.GetRankForPointsAsync(profile.Points);

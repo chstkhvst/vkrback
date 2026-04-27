@@ -92,6 +92,18 @@ namespace ASPNETCore.Infrastructure.Repositories
                 .AsNoTracking()
                 .FirstOrDefaultAsync(c => c.Id == id);
         }
+        public async Task<IEnumerable<NotificationType>> GetNotificationTypesAsync()
+        {
+            return await _context.NotificationTypes
+                .AsNoTracking()
+                .ToListAsync();
+        }
+        public async Task<NotificationType?> GetNotificationTypeByIdAsync(int id)
+        {
+            return await _context.NotificationTypes
+                .AsNoTracking()
+                .FirstOrDefaultAsync(n => n.Id == id);
+        }
 
     }
 }

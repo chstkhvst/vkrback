@@ -53,5 +53,12 @@ namespace ASPNETCore.Application.Services
         public Task<VolunteerRank?> GetVolunteerRankByIdAsync(int id) =>
             _catalogRepository.GetVolunteerRankByIdAsync(id);
         #endregion
+
+        #region Notification Type Methods
+        public Task<IEnumerable<NotificationType>> GetAllNotificationTypesAsync() =>
+            _catalogRepository.GetNotificationTypesAsync();
+        public Task<NotificationType?> GetNotificationTypeByIdAsync(int id) =>
+            _catalogRepository.GetNotificationTypeByIdAsync(id);
+        #endregion
     }
 }

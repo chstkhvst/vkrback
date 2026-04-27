@@ -5,11 +5,6 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ASPNETCore.Infrastructure.Repositories
 {
-    public class UserWithMonthlyPoints
-    {
-        public User User { get; set; }
-        public int MonthlyPoints { get; set; }
-    }
     public class UserRepository : IUserRepository
     {
         private readonly UserManager<User> _userManager;
@@ -127,6 +122,13 @@ namespace ASPNETCore.Infrastructure.Repositories
         public async Task UpdateAsync(User user)
         {
             await _userManager.UpdateAsync(user);
+        }
+        public async Task<List<User>> GetUnapprovedOrganizersAsync()
+        {
+            return await _userManager.Users
+                .Where(u => u.OrganizerProfile != null && !u.OrganizerProfile.IsApproved)
+                .Include(u => u.OrganizerProfile)
+                .ToListAsync();
         }
     }
 }
