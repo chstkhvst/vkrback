@@ -132,15 +132,15 @@ public class AccountController : ControllerBase
         return Ok(users);
     }
     [Authorize(Roles = "moderator")]
-    [HttpPost("approve-organizer/{userId}")]
-    public async Task<IActionResult> ApproveOrganizerProfile(string userId)
+    [HttpPost("moderate-organizer/{userId}")]
+    public async Task<IActionResult> ModerateOrganizerProfile(string userId, bool isApproved)
     {
         var moderatorId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
         if (string.IsNullOrEmpty(moderatorId))
             return Unauthorized();
 
-        var success = await _accountService.ApproveOrganizerProfile(userId, moderatorId);
+        var success = await _accountService.ModerateOrganizerProfile(userId, moderatorId, isApproved);
 
         if (!success)
             return NotFound();

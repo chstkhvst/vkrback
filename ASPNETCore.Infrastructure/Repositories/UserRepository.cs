@@ -1,5 +1,6 @@
 ﻿using ASPNETCore.Domain.Entities;
 using ASPNETCore.Domain.Interfaces;
+using ASPNETCore.Infrastructure.Migrations;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -126,7 +127,7 @@ namespace ASPNETCore.Infrastructure.Repositories
         public async Task<List<User>> GetUnapprovedOrganizersAsync()
         {
             return await _userManager.Users
-                .Where(u => u.OrganizerProfile != null && !u.OrganizerProfile.IsApproved)
+                .Where(u => u.OrganizerProfile != null && !u.OrganizerProfile.IsApproved && u.OrganizerProfile.ModeratedByUserId == null)
                 .Include(u => u.OrganizerProfile)
                 .ToListAsync();
         }

@@ -12,11 +12,13 @@ namespace ASPNETCore.Application.Services
     public class EventService
     {
         private readonly IEventRepository _eventRepository;
+        private readonly IAttendanceRepositiory _attRepository;
         private readonly ILogger<EventService> _logger;
 
-        public EventService(IEventRepository eventRepository, ILogger<EventService> logger)
+        public EventService(IEventRepository eventRepository, IAttendanceRepositiory attRepository, ILogger<EventService> logger)
         {
             _eventRepository = eventRepository;
+            _attRepository = attRepository;
             _logger = logger;
         }
 
@@ -100,7 +102,7 @@ namespace ASPNETCore.Application.Services
             {
                 if (e.EventDateTime.HasValue &&
                     e.EventDateTime.Value < now &&
-                    e.EventStatusId != 5)
+                    e.EventStatusId != 5 && e.EventStatusId != 3 && e.EventStatusId != 4)
                 {
                     e.EventStatusId = 5;
                     await _eventRepository.UpdateAsync(e);
@@ -220,7 +222,40 @@ namespace ASPNETCore.Application.Services
             return new VolunteerEventDTO(created);
         }
 
-        public async Task<VolunteerEventDTO> UpdateAsync(VolunteerEventDTO dto)
+        //public async Task<VolunteerEventDTO> UpdateAsync(VolunteerEventDTO dto)
+        //{
+        //    var entity = new VolunteerEvent
+        //    {
+        //        Id = dto.Id,
+        //        Name = dto.Name,
+        //        Description = dto.Description,
+        //        Lat = dto.Lat,
+        //        Lng = dto.Lng,
+        //        Address = dto.Address,
+        //        EventDateTime = dto.EventDateTime?.ToLocalTime(),
+        //        EventPoints = dto.EventPoints,
+        //        ParticipantsLimit = dto.ParticipantsLimit,
+        //        ImagePath = dto.ImagePath,
+        //        EventCategoryId = dto.EventCategoryId,
+        //        EventStatusId = dto.EventStatusId,
+        //        CityId = dto.CityId,
+        //        UserId = dto.UserId,
+        //        ModeratedByUserId = dto.ModeratedByUserId,
+        //        IsDeleted = dto.IsDeleted
+        //    };
+
+        //    try
+        //    {
+        //        var updated = await _eventRepository.UpdateAsync(entity);
+        //        return new VolunteerEventDTO(updated);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        _logger.LogError(ex, $"Error updating event {dto.Id}");
+        //        throw;
+        //    }
+        //}
+        public async Task<VolunteerEventDTO> UpdateByModeratorAsync(VolunteerEventDTO dto)
         {
             var entity = new VolunteerEvent
             {
@@ -249,11 +284,91 @@ namespace ASPNETCore.Application.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error updating event {dto.Id}");
+                _logger.LogError(ex, $"Error updating event {dto.Id} by moderator");
                 throw;
             }
         }
+        private double ToRadians(double degrees)
+        {
+            return degrees * Math.PI / 180;
+        }
+        private double CalculateDistance(double lat1, double lon1, double lat2, double lon2)
+        {
+            const double EarthRadius = 6371;
 
+            var dLat = ToRadians(lat2 - lat1);
+            var dLon = ToRadians(lon2 - lon1);
+
+            var a = Math.Sin(dLat / 2) * Math.Sin(dLat / 2) +
+                    Math.Cos(ToRadians(lat1)) * Math.Cos(ToRadians(lat2)) *
+                    Math.Sin(dLon / 2) * Math.Sin(dLon / 2);
+
+            var c = 2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a));
+
+            return EarthRadius * c;
+        }
+        public async Task<VolunteerEventDTO> UpdateByOrganizerAsync(UpdateEventDTO dto, string userId)
+        {
+            var existing = await _eventRepository.GetByIdAsync(dto.Id);
+
+            if (existing == null)
+                throw new KeyNotFoundException($"Event {dto.Id} not found");    
+
+            if (existing.UserId != userId)
+                throw new UnauthorizedAccessException();
+
+            if (dto.EventStatusId.HasValue && dto.EventStatusId.Value != existing.EventStatusId)
+                existing.EventStatusId = dto.EventStatusId.Value;
+
+            if (dto.Description != null)
+                existing.Description = dto.Description;
+
+            if (dto.EventDateTime.HasValue)
+                existing.EventDateTime = dto.EventDateTime.Value.ToLocalTime();
+
+            //if (dto.Lat.HasValue)
+            //    existing.Lat = dto.Lat;
+
+            //if (dto.Lng.HasValue)
+            //    existing.Lng = dto.Lng;
+            if (dto.Lat.HasValue && dto.Lng.HasValue && existing.Lat.HasValue && existing.Lng.HasValue)
+            {
+                const double maxDistanceKm = 15;
+                var distance = CalculateDistance(
+                    existing.Lat.Value, existing.Lng.Value, dto.Lat.Value, dto.Lng.Value);
+
+                if (distance > maxDistanceKm)
+                {
+                    throw new Exception(
+                        $"Cannot move event" 
+                    );
+                }
+                existing.Lat = dto.Lat.Value;
+                existing.Lng = dto.Lng.Value;
+            }
+
+            if (dto.Address != null)
+                existing.Address = dto.Address;
+
+            if (dto.ParticipantsLimit.HasValue)
+            {
+                var currParticipants = await _attRepository.CountParticipantsAsync(dto.Id);
+                if (currParticipants > dto.ParticipantsLimit.Value)
+                    throw new Exception("Number of participants exceeds the limit");
+                existing.ParticipantsLimit = dto.ParticipantsLimit.Value;
+            }
+
+            try
+            {
+                var updated = await _eventRepository.UpdateAsync(existing);
+                return new VolunteerEventDTO(updated);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error updating event {dto.Id} by organizer");
+                throw;
+            }
+        }
         public async Task DeleteAsync(int id)
         {
             try

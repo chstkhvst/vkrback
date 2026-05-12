@@ -195,13 +195,16 @@ namespace WebAPI.Controllers
         [HttpGet("reverse-geocode")]
         public async Task<ActionResult<GeocodeResult>> ReverseGeocode(double lat, double lon)
         {
-            var url = $"https://nominatim.openstreetmap.org/reverse?format=json&lat={lat.ToString(CultureInfo.InvariantCulture)}&lon={lon.ToString(CultureInfo.InvariantCulture)}";
-
+            //var url = $"https://nominatim.openstreetmap.org/reverse?format=json&lat={lat.ToString(CultureInfo.InvariantCulture)}&lon={lon.ToString(CultureInfo.InvariantCulture)}";
+            var url = $"https://nominatim.openstreetmap.org/reverse?format=json&addressdetails=1&lat={lat.ToString(CultureInfo.InvariantCulture)}&lon={lon.ToString(CultureInfo.InvariantCulture)}";
             using var httpClient = new HttpClient();
             httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("vkr-localhost-volunteer");
 
             var result = await httpClient.GetFromJsonAsync<GeocodeResult>(url);
-
+            if (result?.address?.country_code != "ru")
+            {
+                return BadRequest("Location must be within Russia");
+            }
             return Ok(result);
         }
         [HttpPost("[action]")]
@@ -224,34 +227,89 @@ namespace WebAPI.Controllers
             return Ok(created);
         }
 
-        [HttpPut("[action]/{id}")]
-        public async Task<ActionResult> UpdateEvent(int id, VolunteerEventDTO dto)
+        //[HttpPut("[action]/{id}")]
+        //public async Task<ActionResult> UpdateEvent(int id, VolunteerEventDTO dto)
+        //{
+        //    var currUser = User.Identity?.IsAuthenticated == true ? User.Identity.Name : "Неавторизованный пользователь";
+
+        //    _logger.LogInformation($"{currUser} обновляет событие {id}");
+        //    var isModerator = User.IsInRole("moderator");
+        //    var currentUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        //    if (isModerator)
+        //    {
+        //        if (!string.IsNullOrEmpty(currentUserId))
+        //        {
+        //            dto.ModeratedByUserId = currentUserId;
+        //        }
+        //    }
+        //    else if (currentUserId != dto.UserId)
+        //    {
+        //        return BadRequest();
+        //    }
+        //    if (!ModelState.IsValid)
+        //        return BadRequest(ModelState);
+
+        //    if (id != dto.Id)
+        //        return BadRequest();
+
+        //    var updated = await _eventService.UpdateAsync(dto);
+
+        //    return Ok(updated);
+        //}
+
+        [HttpPut("update-moderator/{id}")]
+        public async Task<ActionResult> UpdateEventByModerator(int id, VolunteerEventDTO dto)
         {
             var currUser = User.Identity?.IsAuthenticated == true ? User.Identity.Name : "Неавторизованный пользователь";
 
-            _logger.LogInformation($"{currUser} обновляет событие {id}");
-            var isModerator = User.IsInRole("moderator");
+            _logger.LogInformation($"{currUser} (модератор) обновляет событие {id}");
+
             var currentUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (isModerator)
-            {
-                if (!string.IsNullOrEmpty(currentUserId))
-                {
-                    dto.ModeratedByUserId = currentUserId;
-                }
-            }
-            else if (currentUserId != dto.UserId)
-            {
-                return BadRequest();
-            }
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+
+            if (!User.IsInRole("moderator"))
+                return Forbid();
+
+            if (string.IsNullOrEmpty(currentUserId))
+                return Unauthorized();
 
             if (id != dto.Id)
                 return BadRequest();
 
-            var updated = await _eventService.UpdateAsync(dto);
+            dto.ModeratedByUserId = currentUserId;
+
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var updated = await _eventService.UpdateByModeratorAsync(dto);
 
             return Ok(updated);
+        }
+        [HttpPut("update-organizer/{id}")]
+        public async Task<ActionResult> UpdateEventByOrganizer(int id, UpdateEventDTO dto)
+        {
+            var currUser = User.Identity?.IsAuthenticated == true ? User.Identity.Name : "Неавторизованный пользователь";
+
+            _logger.LogInformation($"{currUser} (организатор) обновляет событие {id}");
+
+            var currentUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrEmpty(currentUserId))
+                return Unauthorized();
+
+            if (id != dto.Id)
+                return BadRequest();
+
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+            try
+            {
+                var updated = await _eventService.UpdateByOrganizerAsync(dto, currentUserId);
+                return Ok(updated);
+            }
+            catch (Exception ex) when (ex.Message == "Cannot move event")
+            {
+                return BadRequest("Cannot move event");
+            }
         }
 
         [HttpDelete("[action]/{id}")]

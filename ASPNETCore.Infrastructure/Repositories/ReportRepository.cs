@@ -123,7 +123,10 @@ namespace ASPNETCore.Infrastructure.Repositories
                     ReportedUserId = g.Key,
                     ReportedUser = g.First().Reported, 
                     Count = g.Count(),
-                    Reports = g.ToList()
+                    //Reports = g.ToList()
+                    Reports = g.OrderBy(r => r.ReportStatusId != 1) //  идет первым
+                    .ThenBy(r => r.ReportStatusId)        // потом по возрастанию статуса
+                    .ToList()
                 })
                 .OrderByDescending(g => g.Reports.Count(r => r.ReportStatusId == 1))
                 .ThenByDescending(g => g.Count);

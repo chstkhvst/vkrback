@@ -53,23 +53,26 @@ namespace ASPNETCore.Application.Services
             if (!result.Succeeded)
                 return result;
 
-            await _userManager.AddToRoleAsync(user, "volunteer");
-
-            user.VolunteerProfile = new VolunteerProfile
-            {
-                UserId = user.Id,
-                Points = 0,
-                RankId = 1 
-            };
-
             if (!string.IsNullOrEmpty(model.OrganizationName))
             {
+                await _userManager.AddToRoleAsync(user, "organizer");
                 user.OrganizerProfile = new OrganizerProfile
                 {
                     UserId = user.Id,
                     OrganizationName = model.OrganizationName,
                     Ogrn = model.Ogrn,
                     IsApproved = false
+                };
+            }
+            else
+            {
+                await _userManager.AddToRoleAsync(user, "volunteer");
+
+                user.VolunteerProfile = new VolunteerProfile
+                {
+                    UserId = user.Id,
+                    Points = 0,
+                    RankId = 1
                 };
             }
 
@@ -227,14 +230,14 @@ namespace ASPNETCore.Application.Services
             var result = await _userManager.UpdateAsync(user);
             return result.Succeeded;
         }
-        public async Task<bool> ApproveOrganizerProfile(string userId, string moderatorId)
+        public async Task<bool> ModerateOrganizerProfile(string userId, string moderatorId, bool isApproved)
         {
             var user = await _userRepository.GetByIdWithProfilesAsync(userId);
 
             if (user == null || user.OrganizerProfile == null)
                 return false;
-
-            user.OrganizerProfile.IsApproved = true;
+            if (isApproved)
+                user.OrganizerProfile.IsApproved = true;
             user.OrganizerProfile.ModeratedByUserId = moderatorId;
 
             await _userRepository.UpdateAsync(user);

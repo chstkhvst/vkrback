@@ -6,10 +6,15 @@ using System.Threading.Tasks;
 
 namespace ASPNETCore.Application.Model
 {
+    public class Address
+    {
+        public string country_code { get; set; }
+    }   
     public class GeocodeResult
     {
         public string lat { get; set; }
         public string lon { get; set; }
         public string display_name { get; set; }
+        public Address address { get; set; }
     }
 }
