@@ -62,7 +62,7 @@ namespace ASPNETCore.Application.Services
             var attendees = await _attendanceService.GetByEventIdAsync(dto.EventId);
             
             var notifications = attendees
-                .Where(a => a != null && !a.IsDeleted)
+                .Where(a => a != null && !a.IsDeleted && a.AttendanceStatusId == 1)
                 .Select(a => new Notification
                 {
                     RecipientId = a.UserId,
@@ -70,7 +70,7 @@ namespace ASPNETCore.Application.Services
                     TypeId = dto.TypeId,
                     EventId = dto.EventId,
                     IsRead = false,
-                    CreatedAt = DateTime.UtcNow
+                    CreatedAt = DateTime.UtcNow.ToLocalTime(),
                 })
                 .ToList();
 

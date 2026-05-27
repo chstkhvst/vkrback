@@ -227,36 +227,6 @@ namespace WebAPI.Controllers
             return Ok(created);
         }
 
-        //[HttpPut("[action]/{id}")]
-        //public async Task<ActionResult> UpdateEvent(int id, VolunteerEventDTO dto)
-        //{
-        //    var currUser = User.Identity?.IsAuthenticated == true ? User.Identity.Name : "Неавторизованный пользователь";
-
-        //    _logger.LogInformation($"{currUser} обновляет событие {id}");
-        //    var isModerator = User.IsInRole("moderator");
-        //    var currentUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        //    if (isModerator)
-        //    {
-        //        if (!string.IsNullOrEmpty(currentUserId))
-        //        {
-        //            dto.ModeratedByUserId = currentUserId;
-        //        }
-        //    }
-        //    else if (currentUserId != dto.UserId)
-        //    {
-        //        return BadRequest();
-        //    }
-        //    if (!ModelState.IsValid)
-        //        return BadRequest(ModelState);
-
-        //    if (id != dto.Id)
-        //        return BadRequest();
-
-        //    var updated = await _eventService.UpdateAsync(dto);
-
-        //    return Ok(updated);
-        //}
-
         [HttpPut("update-moderator/{id}")]
         public async Task<ActionResult> UpdateEventByModerator(int id, VolunteerEventDTO dto)
         {

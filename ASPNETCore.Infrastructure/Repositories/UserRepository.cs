@@ -83,7 +83,7 @@ namespace ASPNETCore.Infrastructure.Repositories
                 .Include(u => u.VolunteerProfile)
                     .ThenInclude(vp => vp.Rank)
                 .OrderByDescending(u => u.VolunteerProfile.Points)
-                .Take(50)
+                .Take(20)
                 .ToListAsync();
         }
         public async Task<List<(User User, int MonthlyPoints)>> GetForRatingMonthlyAsync(int months = 1)

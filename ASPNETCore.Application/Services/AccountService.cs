@@ -2,10 +2,8 @@
 using ASPNETCore.Application.Model;
 using ASPNETCore.Domain.Entities;
 using ASPNETCore.Domain.Interfaces;
-using ASPNETCore.Infrastructure.Repositories;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -19,7 +17,7 @@ namespace ASPNETCore.Application.Services
         private readonly BanService _banService;
         private readonly UserManager<User> _userManager;
         private readonly SignInManager<User> _signInManager;
-        private readonly IUserRepository _userRepository; 
+        private readonly IUserRepository _userRepository;
         private readonly IConfiguration _configuration;
         private readonly IWebHostEnvironment _env;
 
@@ -178,10 +176,10 @@ namespace ASPNETCore.Application.Services
                 return false;
 
             user.FullName = model.FullName ?? user.FullName;
-            if (model.UserName !=  null)
+            if (model.UserName != null)
             {
                 user.UserName = model.UserName ?? user.UserName;
-            }     
+            }
 
             if (user.OrganizerProfile != null)
             {
